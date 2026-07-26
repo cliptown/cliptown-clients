@@ -1,0 +1,28 @@
+[package]
+org = "cliptown"
+name = "cliptown-clients"
+version = "0.1.0"
+description = "Official polyglot clients for the Cliptown ecosystem"
+license = "MIT"
+keywords = ["clients", "sdk", "polyglot", "clipboard"]
+
+[package.repository]
+vcs = "git"
+url = "https://github.com/cliptown/cliptown-clients"
+
+[publish]
+include_readme = true
+tag_format = "v{version}"
+
+[targets.nodejs]
+dir = "clients/typescript"
+name = "cliptown-clients-nodejs"
+adapter = "node"
+
+[targets.dart]
+dir = "clients/dart"
+name = "cliptown-clients-dart"
+
+[targets.rust]
+dir = "clients/rust"
+name = "cliptown-clients-rust"
