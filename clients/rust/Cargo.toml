@@ -1,0 +1,8 @@
+[package]
+name = "cliptown-client-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+cliptown-interfaces-rust = { path = "../../../cliptown-interfaces/generated/rust" }
+tokio = { version = "1.36.0", features = ["full"] }
