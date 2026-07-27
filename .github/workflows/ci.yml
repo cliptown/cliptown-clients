@@ -83,7 +83,9 @@ jobs:
         run: dart pub get
       - name: Dart formatting
         working-directory: cliptown-clients/clients/dart
-        run: dart format --output=none --set-exit-if-changed lib test
+        run: |
+          dart format lib test
+          git diff --exit-code -- lib test
       - name: Dart analysis
         working-directory: cliptown-clients/clients/dart
         run: dart analyze
