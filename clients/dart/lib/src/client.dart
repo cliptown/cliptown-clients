@@ -12,14 +12,14 @@ class ClipPage {
   final String? nextCursor;
 
   factory ClipPage.fromJson(Map<String, Object?> json) => ClipPage(
-    items: (json['items']! as List<Object?>)
-        .map(
-          (Object? item) =>
-              ClipEnvelope.fromJson(item! as Map<String, Object?>),
-        )
-        .toList(growable: false),
-    nextCursor: json['next_cursor'] as String?,
-  );
+        items: (json['items']! as List<Object?>)
+            .map(
+              (Object? item) =>
+                  ClipEnvelope.fromJson(item! as Map<String, Object?>),
+            )
+            .toList(growable: false),
+        nextCursor: json['next_cursor'] as String?,
+      );
 }
 
 class CliptownClient {
@@ -27,8 +27,8 @@ class CliptownClient {
     required String endpoint,
     required this.accessToken,
     http.Client? httpClient,
-  }) : endpoint = endpoint.replaceFirst(RegExp(r'/$'), ''),
-       httpClient = httpClient ?? http.Client() {
+  })  : endpoint = endpoint.replaceFirst(RegExp(r'/$'), ''),
+        httpClient = httpClient ?? http.Client() {
     final Uri uri = Uri.parse(this.endpoint);
     final bool local = uri.host == 'localhost' || uri.host == '127.0.0.1';
     if (uri.scheme != 'https' && !(local && uri.scheme == 'http')) {
