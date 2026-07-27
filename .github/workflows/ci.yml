@@ -22,8 +22,19 @@ jobs:
           path: cliptown-interfaces
       - uses: dtolnay/rust-toolchain@stable
         with: {components: rustfmt, clippy}
-      - working-directory: cliptown-clients/clients/rust
-        run: cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+      - name: Verify dependency graph
+        working-directory: cliptown-clients/clients/rust
+        run: cargo metadata --format-version 1 --no-deps >/dev/null
+      - name: Rust formatting
+        working-directory: cliptown-clients/clients/rust
+        run: cargo fmt --check
+      - name: Rust Clippy
+        working-directory: cliptown-clients/clients/rust
+        run: cargo clippy --all-targets --message-format=short -- -D warnings
+      - name: Rust tests
+        working-directory: cliptown-clients/clients/rust
+        env: {RUST_BACKTRACE: "1"}
+        run: cargo test --all-targets -- --nocapture
 
   typescript:
     runs-on: ubuntu-latest
@@ -43,7 +54,7 @@ jobs:
           ref: ${{ steps.interfaces-ref.outputs.ref }}
           path: cliptown-interfaces
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
+        with: {node-version: 22, cache: npm, cache-dependency-path: cliptown-clients/clients/typescript/package.json}
       - working-directory: cliptown-interfaces/generated/typescript
         run: npm install && npm run build
       - working-directory: cliptown-clients/clients/typescript
@@ -68,7 +79,7 @@ jobs:
           path: cliptown-interfaces
       - uses: dart-lang/setup-dart@v1
       - working-directory: cliptown-clients/clients/dart
-        run: dart pub get && dart analyze && dart test
+        run: dart pub get && dart format --output=none --set-exit-if-changed . && dart analyze && dart test
 
   package-layout:
     runs-on: ubuntu-latest
