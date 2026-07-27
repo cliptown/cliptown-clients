@@ -56,9 +56,9 @@ impl CliptownClientBuilder {
         }
         Ok(CliptownClient {
             endpoint,
-            token_provider: self.token_provider.ok_or_else(|| {
-                ClientError::Configuration("token provider is required".into())
-            })?,
+            token_provider: self
+                .token_provider
+                .ok_or_else(|| ClientError::Configuration("token provider is required".into()))?,
             http: self.http,
         })
     }
@@ -133,10 +133,7 @@ impl CliptownClient {
             ));
         }
         let response = self
-            .request(
-                reqwest::Method::PUT,
-                &format!("/v1/clips/{}", clip.clip_id),
-            )
+            .request(reqwest::Method::PUT, &format!("/v1/clips/{}", clip.clip_id))
             .await?
             .header("idempotency-key", key)
             .json(clip)
@@ -147,10 +144,7 @@ impl CliptownClient {
 
     pub async fn delete_clip(&self, clip_id: Uuid) -> Result<(), ClientError> {
         let response = self
-            .request(
-                reqwest::Method::DELETE,
-                &format!("/v1/clips/{clip_id}"),
-            )
+            .request(reqwest::Method::DELETE, &format!("/v1/clips/{clip_id}"))
             .await?
             .send()
             .await?;
