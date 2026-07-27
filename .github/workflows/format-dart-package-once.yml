@@ -12,6 +12,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/cliptown-strong-skeletons
+          path: cliptown-clients
           fetch-depth: 0
       - uses: actions/checkout@v4
         with:
