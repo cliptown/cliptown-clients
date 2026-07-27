@@ -11,23 +11,23 @@ String _timestamp(DateTime value) =>
     value.toUtc().toIso8601String().replaceFirst('.000Z', 'Z');
 
 SignalEnvelopePurpose _purposeFromWire(String value) => switch (value) {
-  'account_key_transfer' => SignalEnvelopePurpose.accountKeyTransfer,
-  'clip_key' => SignalEnvelopePurpose.clipKey,
-  'object_key' => SignalEnvelopePurpose.objectKey,
-  'device_control' => SignalEnvelopePurpose.deviceControl,
-  'recovery_package' => SignalEnvelopePurpose.recoveryPackage,
-  'acknowledgement' => SignalEnvelopePurpose.acknowledgement,
-  _ => throw FormatException('unknown Signal envelope purpose: $value'),
-};
+      'account_key_transfer' => SignalEnvelopePurpose.accountKeyTransfer,
+      'clip_key' => SignalEnvelopePurpose.clipKey,
+      'object_key' => SignalEnvelopePurpose.objectKey,
+      'device_control' => SignalEnvelopePurpose.deviceControl,
+      'recovery_package' => SignalEnvelopePurpose.recoveryPackage,
+      'acknowledgement' => SignalEnvelopePurpose.acknowledgement,
+      _ => throw FormatException('unknown Signal envelope purpose: $value'),
+    };
 
 String _purposeToWire(SignalEnvelopePurpose value) => switch (value) {
-  SignalEnvelopePurpose.accountKeyTransfer => 'account_key_transfer',
-  SignalEnvelopePurpose.clipKey => 'clip_key',
-  SignalEnvelopePurpose.objectKey => 'object_key',
-  SignalEnvelopePurpose.deviceControl => 'device_control',
-  SignalEnvelopePurpose.recoveryPackage => 'recovery_package',
-  SignalEnvelopePurpose.acknowledgement => 'acknowledgement',
-};
+      SignalEnvelopePurpose.accountKeyTransfer => 'account_key_transfer',
+      SignalEnvelopePurpose.clipKey => 'clip_key',
+      SignalEnvelopePurpose.objectKey => 'object_key',
+      SignalEnvelopePurpose.deviceControl => 'device_control',
+      SignalEnvelopePurpose.recoveryPackage => 'recovery_package',
+      SignalEnvelopePurpose.acknowledgement => 'acknowledgement',
+    };
 
 void main() {
   test('security models validate and round-trip through JSON', () {
