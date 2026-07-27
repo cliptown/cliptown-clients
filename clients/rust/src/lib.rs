@@ -1,19 +1,9 @@
-pub mod client {
-    use cliptown_interfaces_rust::models::Clip;
+mod blind_index;
+mod client;
+mod error;
+mod transport;
 
-    pub struct CliptownClient {
-        endpoint: String,
-    }
-
-    impl CliptownClient {
-        pub fn new(endpoint: &str) -> Self {
-            Self {
-                endpoint: endpoint.to_string(),
-            }
-        }
-
-        pub async fn get_clips(&self) -> Result<Vec<Clip>, String> {
-            Ok(vec![])
-        }
-    }
-}
+pub use blind_index::blind_terms;
+pub use client::{ClipPage, CliptownClient, CliptownClientBuilder, PullRequest, PushRequest};
+pub use error::ClientError;
+pub use transport::{AccessTokenProvider, StaticAccessToken};
