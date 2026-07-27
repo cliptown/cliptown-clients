@@ -78,6 +78,8 @@ jobs:
           ref: ${{ steps.interfaces-ref.outputs.ref }}
           path: cliptown-interfaces
       - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.2
       - name: Resolve Dart dependencies
         working-directory: cliptown-clients/clients/dart
         run: dart pub get
