@@ -1,0 +1,35 @@
+name: format-den52-dart-once
+on:
+  push:
+    branches: [agent/den-52-security-model-compatibility]
+permissions:
+  contents: write
+jobs:
+  format:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/den-52-security-model-compatibility
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: main
+          path: cliptown-interfaces
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: 3.12.2
+      - name: Resolve, format, and remove workflow
+        working-directory: clients/dart
+        run: |
+          dart pub get
+          dart format test/security_models_test.dart
+          rm ../../.github/workflows/format-den52-dart-once.yml
+          git add -A
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'style: format DEN-52 Dart fixture'
+          git push origin HEAD:agent/den-52-security-model-compatibility
