@@ -1,0 +1,6 @@
+target/
+node_modules/
+dist/
+.dart_tool/
+.packages
+.DS_Store

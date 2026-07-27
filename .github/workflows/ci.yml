@@ -1,0 +1,77 @@
+name: clients-ci
+on: {pull_request: {}, push: {branches: [main]}}
+permissions: {contents: read}
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: cliptown-clients}
+      - id: interfaces-ref
+        shell: bash
+        env: {CANDIDATE: "${{ github.head_ref }}"}
+        run: |
+          ref=main
+          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          path: cliptown-interfaces
+      - uses: dtolnay/rust-toolchain@stable
+        with: {components: rustfmt, clippy}
+      - working-directory: cliptown-clients/clients/rust
+        run: cargo fmt --check && cargo clippy --all-targets -- -D warnings && cargo test
+
+  typescript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: cliptown-clients}
+      - id: interfaces-ref
+        shell: bash
+        env: {CANDIDATE: "${{ github.head_ref }}"}
+        run: |
+          ref=main
+          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          path: cliptown-interfaces
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - working-directory: cliptown-interfaces/generated/typescript
+        run: npm install && npm run build
+      - working-directory: cliptown-clients/clients/typescript
+        run: npm install && npm run typecheck && npm test && npm run build
+
+  dart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: cliptown-clients}
+      - id: interfaces-ref
+        shell: bash
+        env: {CANDIDATE: "${{ github.head_ref }}"}
+        run: |
+          ref=main
+          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          path: cliptown-interfaces
+      - uses: dart-lang/setup-dart@v1
+      - working-directory: cliptown-clients/clients/dart
+        run: dart pub get && dart analyze && dart test
+
+  package-layout:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: ./scripts/validate-layout.sh

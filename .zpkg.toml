@@ -2,9 +2,9 @@
 org = "cliptown"
 name = "cliptown-clients"
 version = "0.1.0"
-description = "Official polyglot clients for the Cliptown ecosystem"
+description = "Official Rust, TypeScript, and Dart clients for ClipTown"
 license = "MIT"
-keywords = ["clients", "sdk", "polyglot", "clipboard"]
+keywords = ["clipboard", "sdk", "sync", "e2ee"]
 
 [package.repository]
 vcs = "git"
@@ -16,13 +16,13 @@ tag_format = "v{version}"
 
 [targets.nodejs]
 dir = "clients/typescript"
-name = "cliptown-clients-nodejs"
+name = "@cliptown/client"
 adapter = "node"
 
 [targets.dart]
 dir = "clients/dart"
-name = "cliptown-clients-dart"
+name = "cliptown_client"
 
 [targets.rust]
 dir = "clients/rust"
-name = "cliptown-clients-rust"
+name = "cliptown-client-rust"
