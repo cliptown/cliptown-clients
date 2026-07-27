@@ -1,0 +1,74 @@
+{
+  "local_unlock": {
+    "pin_enabled": true,
+    "biometric_enabled": true,
+    "passkey_enabled": false,
+    "pin_kdf": {
+      "algorithm": "argon2id-v1",
+      "memory_kib": 65536,
+      "iterations": 3,
+      "parallelism": 1,
+      "max_attempts": 5,
+      "lockout_seconds": 300
+    }
+  },
+  "signal_envelope": {
+    "metadata": {
+      "protocol_version": 1,
+      "envelope_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0401",
+      "account_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0402",
+      "sender_device_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0403",
+      "recipient_device_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0404",
+      "session_id": "signal-session-0001",
+      "message_number": 7,
+      "purpose": "object_key",
+      "created_at": "2026-07-27T12:00:00Z",
+      "expires_at": "2026-07-27T12:10:00Z"
+    },
+    "ciphertext": "c2lnbmFsLWNpcGhlcnRleHQtZW52ZWxvcGU="
+  },
+  "encrypted_object": {
+    "manifest_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0410",
+    "object_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0411",
+    "clip_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0412",
+    "content_cipher_version": "xchacha20poly1305-chunked-v1",
+    "plaintext_length": 120000,
+    "ciphertext_length": 120032,
+    "chunk_size": 65536,
+    "chunks": [
+      {
+        "chunk_index": 0,
+        "ciphertext_length": 65552,
+        "ciphertext_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "nonce": "bm9uY2UtMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDA=",
+        "randomized_storage_key": "accounts/a1/objects/random-5f7419f311e24bca/chunks/00000000"
+      },
+      {
+        "chunk_index": 1,
+        "ciphertext_length": 54480,
+        "ciphertext_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+        "nonce": "bm9uY2UtMTExMTExMTExMTExMTExMTExMTExMTExMTE=",
+        "randomized_storage_key": "accounts/a1/objects/random-5f7419f311e24bca/chunks/00000001"
+      }
+    ],
+    "wrapped_keys": [
+      {
+        "recipient_device_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0404",
+        "key_id": "object-key-v1",
+        "algorithm": "signal-envelope-v1",
+        "nonce": "d3JhcC1ub25jZS0wMDAwMDAwMDAwMDAwMDAwMDA=",
+        "wrapped_key": "d3JhcHBlZC1jb250ZW50LWtleQ==",
+        "associated_data_hash": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+      }
+    ],
+    "encrypted_metadata": {
+      "algorithm": "xchacha20poly1305-v1",
+      "nonce": "bWV0YWRhdGEtbm9uY2UtMDAwMDAwMDAwMDAwMDA=",
+      "ciphertext": "ZW5jcnlwdGVkLW1ldGFkYXRh",
+      "associated_data_hash": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "key_id": "metadata-key-v1"
+    },
+    "ciphertext_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+    "created_at": "2026-07-27T12:00:00Z"
+  }
+}
