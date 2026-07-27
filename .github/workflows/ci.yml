@@ -78,8 +78,18 @@ jobs:
           ref: ${{ steps.interfaces-ref.outputs.ref }}
           path: cliptown-interfaces
       - uses: dart-lang/setup-dart@v1
-      - working-directory: cliptown-clients/clients/dart
-        run: dart pub get && dart format --output=none --set-exit-if-changed . && dart analyze && dart test
+      - name: Resolve Dart dependencies
+        working-directory: cliptown-clients/clients/dart
+        run: dart pub get
+      - name: Dart formatting
+        working-directory: cliptown-clients/clients/dart
+        run: dart format --output=none --set-exit-if-changed .
+      - name: Dart analysis
+        working-directory: cliptown-clients/clients/dart
+        run: dart analyze
+      - name: Dart tests
+        working-directory: cliptown-clients/clients/dart
+        run: dart test --reporter=expanded
 
   package-layout:
     runs-on: ubuntu-latest
