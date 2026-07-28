@@ -29,6 +29,7 @@ void main() {
     expect(tombstone.optInEmbedding, isNull);
 
     final roundTrippedTombstone = tombstone.toJson()
+      ..['opt_in_embedding'] = tombstone.optInEmbedding
       ..['created_at'] = _timestamp(tombstone.createdAt)
       ..['updated_at'] = _timestamp(tombstone.updatedAt);
     final roundTripped = <String, Object?>{
