@@ -5,7 +5,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  readdirSync,
   rmSync,
   statSync,
   writeFileSync,
@@ -81,23 +80,18 @@ if (rustReleaseManifest === rustManifestText || /\bpath\s*=/.test(rustReleaseMan
   fail('Rust release manifest still contains a workspace-only path dependency');
 }
 const rustWorkspace = join(workspace, 'rust');
-copy(join(rustSource, 'src'), join(rustWorkspace, 'src'));
-copy(join(rustSource, 'tests'), join(rustWorkspace, 'tests'));
-writeFileSync(join(rustWorkspace, 'Cargo.toml'), rustReleaseManifest);
-run('cargo', [
-  'package',
-  '--allow-dirty',
-  '--no-verify',
-  '--manifest-path',
-  join(rustWorkspace, 'Cargo.toml'),
-  '--target-dir',
-  join(rustWorkspace, 'target'),
-]);
-const rustPackageDir = join(rustWorkspace, 'target', 'package');
-const rustArchiveName = readdirSync(rustPackageDir).find((name) => name.endsWith('.crate'));
-if (!rustArchiveName) fail('cargo package did not produce a .crate archive');
-const rustArchive = join(output, rustArchiveName);
-copy(join(rustPackageDir, rustArchiveName), rustArchive);
+const rustPackageName = `${rustName}-${rustVersion}`;
+const rustPackageRoot = join(rustWorkspace, rustPackageName);
+copy(join(rustSource, 'src'), join(rustPackageRoot, 'src'));
+copy(join(rustSource, 'tests'), join(rustPackageRoot, 'tests'));
+writeFileSync(join(rustPackageRoot, 'Cargo.toml'), rustReleaseManifest);
+writeFileSync(
+  join(rustPackageRoot, '.cargo_vcs_info.json'),
+  `${JSON.stringify({git: {sha1: process.env.GITHUB_SHA ?? null, dirty: false}, path_in_vcs: 'clients/rust'}, null, 2)}\n`,
+);
+const rustArchive = join(output, `${rustPackageName}.crate`);
+run('tar', ['-czf', rustArchive, '-C', rustWorkspace, rustPackageName]);
+run('tar', ['-tzf', rustArchive], {capture: true});
 
 const typescriptSource = join(root, 'clients', 'typescript');
 const typescriptManifest = JSON.parse(readFileSync(join(typescriptSource, 'package.json'), 'utf8'));
@@ -141,6 +135,7 @@ copy(join(dartSource, 'lib'), join(dartWorkspace, 'lib'));
 writeFileSync(join(dartWorkspace, 'pubspec.yaml'), dartReleaseManifest);
 const dartArchive = join(output, `${dartName}-${dartVersion}.tar.gz`);
 run('tar', ['-czf', dartArchive, '-C', dartWorkspace, '.']);
+run('tar', ['-tzf', dartArchive], {capture: true});
 
 const versions = new Set([zpkgVersion, rustVersion, typescriptVersion, dartVersion]);
 if (versions.size !== 1) {
@@ -148,7 +143,7 @@ if (versions.size !== 1) {
 }
 
 const artifacts = [
-  artifact(rustArchive, 'cargo-crate'),
+  artifact(rustArchive, 'cargo-source-archive'),
   artifact(npmArchive, 'npm-tarball'),
   artifact(dartArchive, 'dart-source-archive'),
 ];
@@ -157,7 +152,11 @@ const releasePlan = {
   version: zpkgVersion,
   publish: false,
   packages: {
-    rust: {name: rustName, dependency: 'cliptown-interfaces-rust@0.1.0'},
+    rust: {
+      name: rustName,
+      dependency: 'cliptown-interfaces-rust@0.1.0',
+      registry_validation: 'blocked_until_interface_crate_is_published',
+    },
     typescript: {name: typescriptName, dependency: '@cliptown/interfaces@0.1.0'},
     dart: {name: dartName, dependency: 'cliptown_interfaces@^0.1.0'},
     zed_pkg: {name: 'cliptown/cliptown-clients', targets: ['rust', 'nodejs', 'dart']},
