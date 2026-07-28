@@ -1,0 +1,29 @@
+{
+  "items": [
+    {
+      "clip_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0501",
+      "kind": "text",
+      "payload": {
+        "algorithm": "xchacha20poly1305-v1",
+        "nonce": "dG9tYnN0b25lLW5vbmNlLTAwMDAwMDAwMDAwMDA=",
+        "ciphertext": "ZW5jcnlwdGVkLXRvbWJzdG9uZS1wYXlsb2Fk",
+        "associated_data_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "key_id": "clip-key-v7"
+      },
+      "pinned": false,
+      "deleted": true,
+      "blind_terms": [],
+      "opt_in_embedding": null,
+      "source_app": "com.example.editor",
+      "source_device_id": "018f6a84-4a18-7cc1-b19a-fb0bca4b0502",
+      "logical_clock": 77,
+      "created_at": "2026-07-27T12:00:00Z",
+      "updated_at": "2026-07-27T12:05:00Z"
+    }
+  ],
+  "next_cursor": {
+    "cursor": "server-sequence:42",
+    "server_sequence": 42
+  },
+  "has_more": false
+}
