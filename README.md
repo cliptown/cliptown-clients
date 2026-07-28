@@ -17,4 +17,14 @@ All write methods accept an idempotency key. Sync cursors are opaque. Peer-to-pe
 
 `fixtures/sync-page.json` models a final synchronization page that still advances its opaque cursor while carrying an encrypted tombstone. The three client languages verify `has_more = false`, a non-null next cursor, the monotonic server sequence, and the deleted clip envelope. This prevents clients from treating final-page status as permission to discard cursor advancement or tombstones.
 
-CI enforces canonical Rust and Dart formatting, Clippy, unit tests, TypeScript typechecking/tests, and package-layout validation against the merged interface contract. Dart formatting is pinned to SDK 3.12.2 and runs after dependency resolution so local and hosted checks use the package's declared language version.
+## Package dry runs
+
+```sh
+node scripts/package-dry-run.mjs
+```
+
+The command creates registry-independent Rust, npm, and Dart source archives under `dist/package-dry-run`, plus `SHA256SUMS` and a machine-readable package manifest. Release-only manifests replace sibling `path:` and `file:` dependencies with explicit `0.1.0` interface-package requirements without changing local development manifests.
+
+This is a packaging rehearsal, not publication. It does not contact crates.io, npm, pub.dev, Zed Cloud, or GitHub Releases and requires no registry credentials. Real publishing remains blocked until the corresponding interface packages, provenance, signing, and protected release workflow are reviewed.
+
+CI enforces canonical Rust and Dart formatting, Clippy, unit tests, TypeScript typechecking/tests, package-layout validation, and the package dry-run archive contract against the merged interface contract. Dart formatting is pinned to SDK 3.12.2 and runs after dependency resolution so local and hosted checks use the package's declared language version.
