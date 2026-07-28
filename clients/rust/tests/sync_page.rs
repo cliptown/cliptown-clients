@@ -17,7 +17,7 @@ fn final_page_advances_cursor_and_preserves_tombstone() {
     assert!(!fixture.has_more);
     assert_eq!(
         fixture.next_cursor.cursor.as_deref(),
-        Some("server-sequence:42")
+        Some("server-sequence:42"),
     );
     assert_eq!(fixture.next_cursor.server_sequence, 42);
     assert_eq!(fixture.items.len(), 1);
