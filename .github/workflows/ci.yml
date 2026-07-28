@@ -100,3 +100,43 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: ./scripts/validate-layout.sh
+
+  package-dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: {path: cliptown-clients}
+      - uses: actions/checkout@v4
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: main
+          path: cliptown-interfaces
+      - uses: actions/setup-node@v4
+        with: {node-version: 22}
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build TypeScript package inputs
+        run: |
+          cd cliptown-interfaces/generated/typescript
+          npm install
+          npm run build
+          cd ../../../cliptown-clients/clients/typescript
+          npm install
+          npm run build
+      - name: Create registry-independent package dry runs
+        working-directory: cliptown-clients
+        run: node scripts/package-dry-run.mjs
+      - name: Verify package manifest and checksums
+        working-directory: cliptown-clients
+        run: |
+          test -s dist/package-dry-run/package-manifest.json
+          test -s dist/package-dry-run/SHA256SUMS
+          test "$(find dist/package-dry-run -maxdepth 1 -type f \( -name '*.crate' -o -name '*.tgz' -o -name '*.tar.gz' \) | wc -l)" -eq 3
+          if grep -RInE 'file:|path:' dist/package-dry-run/package-manifest.json; then
+            echo 'workspace-only dependencies leaked into the release plan' >&2
+            exit 1
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cliptown-package-dry-run
+          path: cliptown-clients/dist/package-dry-run
+          if-no-files-found: error
