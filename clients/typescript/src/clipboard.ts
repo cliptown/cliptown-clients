@@ -79,14 +79,17 @@ export class WebClipboard implements ClipboardPort {
   }
 
   async writeImage(image: Blob): Promise<void> {
-    const clipboard = this.#navigator.clipboard;
-    if (typeof clipboard?.write !== 'function' || typeof ClipboardItem !== 'function') {
-      throw new ClipboardUnavailableError('image write');
-    }
+    // Argument validation precedes the capability check so a caller passing
+    // JPEG gets told so, rather than a misleading "unavailable" on any host
+    // that happens to lack the async clipboard API.
     if (image.type !== CLIPBOARD_IMAGE_TYPE) {
       throw new Error(
         `clipboard images must be ${CLIPBOARD_IMAGE_TYPE}; received "${image.type || 'unknown'}"`,
       );
+    }
+    const clipboard = this.#navigator.clipboard;
+    if (typeof clipboard?.write !== 'function' || typeof ClipboardItem !== 'function') {
+      throw new ClipboardUnavailableError('image write');
     }
     try {
       await clipboard.write([new ClipboardItem({ [CLIPBOARD_IMAGE_TYPE]: image })]);
