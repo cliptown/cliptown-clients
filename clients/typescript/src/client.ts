@@ -28,7 +28,7 @@ export class CliptownClient {
       ...init,
       headers: { accept: 'application/json', authorization: `Bearer ${token}`, ...init.headers },
     });
-    if (!response.ok) throw new Error(`ClipTown API ${response.status}: ${await response.text()}`);
+    if (!response.ok) throw new CliptownApiError(response.status, path);
     return response.status === 204 ? undefined as T : await response.json() as T;
   }
 
