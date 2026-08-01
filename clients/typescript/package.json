@@ -2,13 +2,23 @@
   "name": "@cliptown/client",
   "version": "0.1.0",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./clipboard": {
+      "types": "./dist/clipboard.d.ts",
+      "import": "./dist/clipboard.js"
+    }
+  },
   "types": "./dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc -p tsconfig.build.json",
+    "build": "npm run build:interfaces && tsc -p tsconfig.build.json",
+    "build:interfaces": "npm --prefix ../../../cliptown-interfaces/generated/typescript run build",
     "typecheck": "tsc --noEmit",
     "test": "node --import tsx --test test/**/*.test.ts"
   },
