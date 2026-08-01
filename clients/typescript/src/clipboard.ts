@@ -173,22 +173,23 @@ export interface ClipboardServiceOptions {
  */
 export class ClipboardService {
   readonly #port: ClipboardPort;
-  readonly #history: ClipboardHistorySink | undefined;
-  readonly #onHistoryError: (error: unknown) => void;
+  readonly #recorder: ClipRecorder | undefined;
+  readonly #onRecordError: (error: unknown) => void;
 
   constructor(options: ClipboardServiceOptions = {}) {
     this.#port = options.port ?? new WebClipboard();
-    this.#history = options.history;
-    this.#onHistoryError = options.onHistoryError ?? (() => {});
+    this.#recorder = options.recorder;
+    this.#onRecordError = options.onRecordError ?? (() => {});
   }
 
   /** True when copies are also recorded to ClipTown. */
   get recordsHistory(): boolean {
-    return this.#history !== undefined;
+    return this.#recorder !== undefined;
   }
 
   async copyText(text: string): Promise<void> {
     await this.#port.writeText(text);
+    await this.#record({ kind: 'text', text });
   }
 
   /**
@@ -196,10 +197,22 @@ export class ClipboardService {
    * This is the path an image or meme library uses.
    */
   async copyImage(image: Blob): Promise<void> {
-    await this.#port.writeImage(await toClipboardImage(image));
+    const png = await toClipboardImage(image);
+    await this.#port.writeImage(png);
+    await this.#record({ kind: 'image', image: png });
   }
 
   async paste(): Promise<string> {
     return this.#port.readText();
+  }
+
+  /** The copy already succeeded, so a recording failure is reported, not thrown. */
+  async #record(copied: CopiedClip): Promise<void> {
+    if (!this.#recorder) return;
+    try {
+      await this.#recorder.record(copied);
+    } catch (error) {
+      this.#onRecordError(error);
+    }
   }
 }
