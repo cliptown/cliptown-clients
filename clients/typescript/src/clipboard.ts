@@ -132,9 +132,23 @@ export async function toClipboardImage(source: Blob): Promise<Blob> {
   }
 }
 
-/** Optional history sink — structurally satisfied by `CliptownClient`. */
-export interface ClipboardHistorySink {
-  putClip(clip: never, idempotencyKey?: string): Promise<unknown>;
+/** What was copied, handed to a {@link ClipRecorder} after the fact. */
+export interface CopiedClip {
+  kind: 'text' | 'image';
+  text?: string;
+  image?: Blob;
+}
+
+/**
+ * Optional history hook.
+ *
+ * ClipTown stores client-encrypted envelopes, and this package holds no keys,
+ * so it cannot build one from plaintext. A host that wants history implements
+ * this: encrypt the payload with the keys it owns, then call
+ * `CliptownClient.putClip`. Hosts that only want clipboard actions omit it.
+ */
+export interface ClipRecorder {
+  record(copied: CopiedClip): Promise<void>;
 }
 
 export interface ClipboardServiceOptions {
@@ -145,9 +159,9 @@ export interface ClipboardServiceOptions {
    * this is the difference between an embedded host and the full ClipTown app,
    * not between working and broken.
    */
-  history?: ClipboardHistorySink;
+  recorder?: ClipRecorder;
   /** Called when a history write fails. A copy already succeeded by then. */
-  onHistoryError?: (error: unknown) => void;
+  onRecordError?: (error: unknown) => void;
 }
 
 /**
