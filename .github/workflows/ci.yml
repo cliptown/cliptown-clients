@@ -36,6 +36,26 @@ jobs:
         env: {RUST_BACKTRACE: "1"}
         run: cargo test --all-targets -- --nocapture
 
+  go:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: clients/go
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version: "1.22.x"
+          cache-dependency-path: clients/go/go.mod
+      - name: Go formatting
+        run: |
+          if test -n "$(gofmt -l .)"; then
+            gofmt -d .
+            exit 1
+          fi
+      - run: go vet ./...
+      - run: go test ./...
+
   typescript:
     runs-on: ubuntu-latest
     steps:
