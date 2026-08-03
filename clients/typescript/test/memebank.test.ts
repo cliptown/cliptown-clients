@@ -42,7 +42,7 @@ function transfer(overrides: Partial<MemeBankTransfer> = {}): MemeBankTransfer {
 
 test('MemeBank transfer uses delegated bearer and API-only SDK route', async () => {
   let tokenCalls = 0;
-  const requests: Array<{ url: string; init?: RequestInit }> = [];
+  const requests: Array<{ url: string; init: RequestInit | undefined }> = [];
   const fetchImpl = (async (
     input: string | URL | Request,
     init?: RequestInit,
