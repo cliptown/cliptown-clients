@@ -48,7 +48,7 @@ var (
 
 var (
 	portableIdentifier = regexp.MustCompile(`^[A-Za-z0-9._:-]+$`)
-	canonicalUUID      = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$`)
+	canonicalUUID      = regexp.MustCompile(`^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`)
 )
 
 type TransferDirection string
@@ -86,15 +86,15 @@ type CipherEnvelope struct {
 }
 
 type CreateTransferRequest struct {
-	ContractVersion  int               `json:"contract_version"`
-	Direction        TransferDirection `json:"direction"`
-	SourceItemID     string            `json:"source_item_id"`
-	MediaType        string            `json:"media_type"`
-	ContentSHA256    string            `json:"content_sha256"`
-	ContentLength    int64             `json:"content_length"`
-	Payload          CipherEnvelope    `json:"payload"`
+	ContractVersion   int               `json:"contract_version"`
+	Direction         TransferDirection `json:"direction"`
+	SourceItemID      string            `json:"source_item_id"`
+	MediaType         string            `json:"media_type"`
+	ContentSHA256     string            `json:"content_sha256"`
+	ContentLength     int64             `json:"content_length"`
+	Payload           CipherEnvelope    `json:"payload"`
 	EncryptedMetadata *CipherEnvelope   `json:"encrypted_metadata,omitempty"`
-	ExpiresAt        time.Time         `json:"expires_at"`
+	ExpiresAt         time.Time         `json:"expires_at"`
 }
 
 type Transfer struct {
@@ -138,10 +138,10 @@ func (provider TokenProviderFunc) AccessToken(ctx context.Context) (string, erro
 }
 
 type Client struct {
-	baseURL      *url.URL
-	httpClient   *http.Client
+	baseURL       *url.URL
+	httpClient    *http.Client
 	tokenProvider TokenProvider
-	userAgent    string
+	userAgent     string
 }
 
 type Option func(*Client) error
@@ -383,13 +383,11 @@ func (client *Client) doJSON(request *http.Request, output any) error {
 		}
 		return nil
 	}
+
 	limited := &io.LimitedReader{R: response.Body, N: maximumResponseBytes + 1}
 	decoder := json.NewDecoder(limited)
 	if err := decoder.Decode(output); err != nil {
 		return err
-	}
-	if limited.N <= 0 {
-		return ErrPayloadTooLarge
 	}
 	var trailing any
 	if err := decoder.Decode(&trailing); err != io.EOF {
@@ -397,6 +395,9 @@ func (client *Client) doJSON(request *http.Request, output any) error {
 			return ErrIncompatibleContract
 		}
 		return err
+	}
+	if limited.N <= 0 {
+		return ErrPayloadTooLarge
 	}
 	return nil
 }
@@ -447,31 +448,31 @@ func decodeStatusError(response *http.Response) error {
 	if code == "" {
 		code = strings.TrimSpace(payload.Error)
 	}
-	if len(code) > 128 || strings.ContainsAny(code, "\r\n") {
+	if limited.N <= 0 || len(code) > 128 || strings.ContainsAny(code, "\r\n") {
 		code = ""
 	}
 	return &StatusError{StatusCode: response.StatusCode, Code: code}
 }
 
 func (request CreateTransferRequest) validate() error {
-	if request.ContractVersion != ContractVersion
-		|| !validDirection(request.Direction)
-		|| !validPortableIdentifier(request.SourceItemID, 128)
-		|| !validMediaType(request.MediaType)
-		|| !validSHA256(request.ContentSHA256)
-		|| request.ContentLength < 0
-		|| request.ContentLength > MaximumInlineCipherBytes
-		|| request.ExpiresAt.IsZero()
-		|| request.Payload.validate(request.ContentLength) != nil {
+	if request.ContractVersion != ContractVersion ||
+		!validDirection(request.Direction) ||
+		!validPortableIdentifier(request.SourceItemID, 128) ||
+		!validMediaType(request.MediaType) ||
+		!validSHA256(request.ContentSHA256) ||
+		request.ContentLength < 0 ||
+		request.ContentLength > MaximumInlineCipherBytes ||
+		request.ExpiresAt.IsZero() ||
+		request.Payload.validate() != nil {
 		return ErrInvalidRequest
 	}
-	if request.EncryptedMetadata != nil && request.EncryptedMetadata.validate(-1) != nil {
+	if request.EncryptedMetadata != nil && request.EncryptedMetadata.validate() != nil {
 		return ErrInvalidRequest
 	}
 	return nil
 }
 
-func (envelope CipherEnvelope) validate(expectedBytes int64) error {
+func (envelope CipherEnvelope) validate() error {
 	if envelope.Algorithm != "xchacha20poly1305-v1" && envelope.Algorithm != "aes-256-gcm-v1" {
 		return ErrInvalidRequest
 	}
@@ -482,7 +483,7 @@ func (envelope CipherEnvelope) validate(expectedBytes int64) error {
 		return ErrInvalidRequest
 	}
 	decodedLength, ok := decodedBase64Length(envelope.Ciphertext)
-	if !ok || decodedLength > MaximumInlineCipherBytes || (expectedBytes >= 0 && int64(decodedLength) != expectedBytes) {
+	if !ok || decodedLength > MaximumInlineCipherBytes {
 		return ErrInvalidRequest
 	}
 	if envelope.AssociatedDataHash != nil && !validBase64(*envelope.AssociatedDataHash, 128) {
@@ -492,11 +493,11 @@ func (envelope CipherEnvelope) validate(expectedBytes int64) error {
 }
 
 func (request AcknowledgeTransferRequest) validate() error {
-	if request.ContractVersion != ContractVersion
-		|| !validPortableIdentifier(request.ClientReceiptID, 128)
-		|| (request.Disposition != DispositionAcknowledged
-			&& request.Disposition != DispositionIgnored
-			&& request.Disposition != DispositionRejected) {
+	if request.ContractVersion != ContractVersion ||
+		!validPortableIdentifier(request.ClientReceiptID, 128) ||
+		(request.Disposition != DispositionAcknowledged &&
+			request.Disposition != DispositionIgnored &&
+			request.Disposition != DispositionRejected) {
 		return ErrInvalidRequest
 	}
 	return nil
@@ -506,11 +507,11 @@ func (transfer Transfer) validateServerValue() error {
 	if transfer.ContractVersion != ContractVersion {
 		return ErrIncompatibleContract
 	}
-	if !validUUID(transfer.TransferID)
-		|| !validTransferState(transfer.State)
-		|| transfer.CreatedAt.IsZero()
-		|| transfer.UpdatedAt.IsZero()
-		|| transfer.CreateTransferRequest.validate() != nil {
+	if !validUUID(transfer.TransferID) ||
+		!validTransferState(transfer.State) ||
+		transfer.CreatedAt.IsZero() ||
+		transfer.UpdatedAt.IsZero() ||
+		transfer.CreateTransferRequest.validate() != nil {
 		return ErrIncompatibleContract
 	}
 	return nil
