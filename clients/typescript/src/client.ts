@@ -73,7 +73,7 @@ export interface AcknowledgeMemeBankTransferRequest {
 
 export class CliptownHttpError extends Error {
   readonly status: number;
-  readonly code?: string;
+  readonly code: string | undefined;
 
   constructor(status: number, code?: string) {
     super(code ? `ClipTown API ${status} (${code})` : `ClipTown API ${status}`);
@@ -286,7 +286,7 @@ export class CliptownClient {
 
   cancelMemeBankTransfer(transferId: string): Promise<void> {
     assertTransferId(transferId);
-    return this.#request(
+    return this.#request<void>(
       `/v1/integrations/memebank/transfers/${encodeURIComponent(transferId)}`,
       { method: 'DELETE' },
     );
