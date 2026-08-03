@@ -2,7 +2,7 @@
 org = "cliptown"
 name = "cliptown-clients"
 version = "0.1.0"
-description = "Official Rust, TypeScript, and Dart clients for ClipTown"
+description = "Official Rust, TypeScript, Dart, and Go clients for ClipTown"
 license = "MIT"
 keywords = ["clipboard", "sdk", "sync", "e2ee"]
 
@@ -26,3 +26,7 @@ name = "cliptown_client"
 [targets.rust]
 dir = "clients/rust"
 name = "cliptown-client-rust"
+
+[targets.golang]
+dir = "clients/go"
+name = "github.com/cliptown/cliptown-clients/clients/go"
