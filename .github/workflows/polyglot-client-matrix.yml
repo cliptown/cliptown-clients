@@ -18,12 +18,16 @@ jobs:
         with: {persist-credentials: false}
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: python3 scripts/check-polyglot-matrix.py
-      - name: Validate portable source and metadata
+      - name: Validate canonical Zed matrix
+        run: python3 scripts/check-polyglot-matrix.py
+      - name: Validate Python 3 source
+        run: python3 -m compileall -q clients/python/src
+      - name: Validate Ruby source
+        run: ruby -c clients/ruby/lib/cliptown_client.rb
+      - name: Validate PHP source
+        run: php -l clients/php/src/Client.php
+      - name: Validate Maven package metadata
         run: |
-          python3 -m compileall -q clients/python/src
-          ruby -c clients/ruby/lib/cliptown_client.rb
-          php -l clients/php/src/Client.php
           python3 - <<'PY'
           import xml.etree.ElementTree as ET
           ET.parse("clients/java/pom.xml")
