@@ -24,6 +24,20 @@ exclude = [".vendor/.zed/**", "**/node_modules/**", "**/target/**", "**/dist/**"
 [targets.repository]
 dir = "."
 
+[targets.c]
+dir = "clients/c"
+adapter = "none"
+
+[targets.cpp]
+dir = "clients/cpp"
+adapter = "none"
+
+[targets.zig]
+dir = "clients/zig"
+adapter = "none"
+
+# The single TypeScript package contains explicit Node.js, Deno, Bun, and edge
+# exports beneath src/runtimes so Zed target re-rooting preserves shared source.
 [targets.nodejs]
 dir = "clients/typescript"
 name = "@cliptown/client"
