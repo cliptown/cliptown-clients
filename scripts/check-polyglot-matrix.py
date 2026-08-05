@@ -6,6 +6,9 @@ import tomllib
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REQUIRED = {
+    "c": ("clients/c", "CMakeLists.txt"),
+    "cpp": ("clients/cpp", "CMakeLists.txt"),
+    "zig": ("clients/zig", "build.zig"),
     "nodejs": ("clients/typescript", "package.json"),
     "golang": ("clients/go", "go.mod"),
     "python": ("clients/python", "pyproject.toml"),
@@ -34,4 +37,4 @@ package = json.loads((ROOT / "clients/typescript/package.json").read_text())
 for runtime in ("nodejs", "deno", "bun", "edge"):
     assert f"./{runtime}" in package["exports"]
     assert (ROOT / "clients/typescript/src/runtimes" / f"{runtime}.ts").is_file()
-print("ClipTown client matrix: 13 requested language slices and four TypeScript runtimes")
+print("ClipTown client matrix: 16 requested language slices and four TypeScript runtimes")

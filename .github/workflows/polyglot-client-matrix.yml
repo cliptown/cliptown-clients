@@ -20,6 +20,10 @@ jobs:
         with: {python-version: "3.12"}
       - name: Validate canonical Zed matrix
         run: python3 scripts/check-polyglot-matrix.py
+      - name: Compile C11 slice
+        run: cc -std=c11 -Wall -Wextra -Werror -Iclients/c/include -c clients/c/src/client.c -o /tmp/cliptown-client-c.o
+      - name: Compile C++17 slice
+        run: printf '#include "cliptown/client.hpp"\nint main(){cliptown::Client c{"https://example.invalid"}; return c.endpoint("v1/transfers").empty();}\n' | c++ -std=c++17 -Wall -Wextra -Werror -Iclients/cpp/include -x c++ - -o /tmp/cliptown-client-cpp
       - name: Validate Python 3 source
         run: python3 -m compileall -q clients/python/src
       - name: Validate Ruby source
