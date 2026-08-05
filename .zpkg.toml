@@ -90,4 +90,3 @@ adapter = "none"
 
 [dependencies]
 "cliptown/cliptown-interfaces" = "^0.1.0"
-"cliptown/cliptown-lib" = "^0.1.0"
