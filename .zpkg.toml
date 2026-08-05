@@ -10,29 +10,40 @@ keywords = ["clipboard", "sdk", "sync", "e2ee"]
 vcs = "git"
 url = "https://github.com/cliptown/cliptown-clients"
 
+[dependencies]
+"cliptown/cliptown-interfaces" = "^0.1.0"
+
 [publish]
 include_readme = true
 tag_format = "v{version}"
+
+[targets.repository]
+dir = "."
 
 [targets.nodejs]
 dir = "clients/typescript"
 name = "@cliptown/client"
 adapter = "node"
 
-[targets.dart]
-dir = "clients/dart"
-name = "cliptown_client"
-adapter = "dart"
+[targets.python]
+dir = "clients/python3"
+adapter = "python"
+
+[targets.golang]
+dir = "clients/golang"
+adapter = "go"
 
 [targets.rust]
 dir = "clients/rust"
 name = "cliptown-client-rust"
 adapter = "rust"
 
-[targets.repository]
-dir = "."
+[targets.dart]
+dir = "clients/dart"
+name = "cliptown_client"
+adapter = "dart"
 
-[targets.gleamlang]
+[targets.gleam]
 dir = "clients/gleamlang"
 adapter = "none"
 
@@ -48,13 +59,9 @@ adapter = "none"
 dir = "clients/java"
 adapter = "java"
 
-[targets.golang]
-dir = "clients/golang"
-adapter = "go"
-
-[targets.python3]
-dir = "clients/python3"
-adapter = "none"
+[targets.kotlin]
+dir = "clients/kotlin"
+adapter = "java"
 
 [targets.ruby]
 dir = "clients/ruby"
@@ -64,30 +71,5 @@ adapter = "none"
 dir = "clients/php"
 adapter = "none"
 
-[targets.typescript-nodejs]
-dir = "clients/typescript/nodejs"
-adapter = "node"
-
-[targets.typescript-deno]
-dir = "clients/typescript/deno"
-adapter = "none"
-
-[targets.typescript-bun]
-dir = "clients/typescript/bun"
-adapter = "node"
-
-[targets.typescript-edge]
-dir = "clients/typescript/edge"
-adapter = "none"
-
-[targets.kotlin]
-dir = "clients/kotlin"
-adapter = "none"
-
 [targets.swift]
 dir = "clients/swift"
-adapter = "none"
-
-[dependencies]
-"cliptown/cliptown-interfaces" = "^0.1.0"
-"cliptown/cliptown-lib" = "^0.1.0"
