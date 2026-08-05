@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cliptown-client"
+version = "0.1.0"
+description = "ClipTown HTTP client"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+dependencies = []
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/cliptown_client"]
