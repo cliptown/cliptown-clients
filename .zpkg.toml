@@ -10,9 +10,16 @@ keywords = ["clipboard", "sdk", "sync", "e2ee"]
 vcs = "git"
 url = "https://github.com/cliptown/cliptown-clients"
 
+[install]
+dir = ".vendor/.zed"
+
+[dependencies]
+"cliptown/cliptown-interfaces" = "^0.1.0"
+
 [publish]
 include_readme = true
 tag_format = "v{version}"
+exclude = [".vendor/.zed/**"]
 
 [targets.nodejs]
 dir = "clients/typescript"
