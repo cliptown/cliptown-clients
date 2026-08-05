@@ -1,0 +1,31 @@
+name: polyglot client matrix
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  matrix:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with: {persist-credentials: false}
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python3 scripts/check-polyglot-matrix.py
+      - name: Validate portable source and metadata
+        run: |
+          python3 -m compileall -q clients/python/src
+          ruby -c clients/ruby/lib/cliptown_client.rb
+          php -l clients/php/src/Client.php
+          python3 - <<'PY'
+          import xml.etree.ElementTree as ET
+          ET.parse("clients/java/pom.xml")
+          ET.parse("clients/kotlin/pom.xml")
+          PY

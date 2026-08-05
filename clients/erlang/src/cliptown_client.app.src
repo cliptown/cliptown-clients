@@ -1,0 +1,1 @@
+{application, cliptown_client, [{description, "ClipTown HTTP client"}, {vsn, "0.1.0"}, {modules, [cliptown_client]}, {applications, [kernel, stdlib, inets, ssl, jsx]}]}.

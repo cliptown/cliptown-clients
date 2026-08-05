@@ -1,0 +1,8 @@
+{
+  "name": "cliptown/client",
+  "description": "ClipTown HTTP client",
+  "license": "MIT",
+  "type": "library",
+  "require": {"php": ">=8.2", "ext-curl": "*", "ext-json": "*"},
+  "autoload": {"psr-4": {"ClipTown\\": "src/"}}
+}

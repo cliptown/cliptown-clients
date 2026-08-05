@@ -2,11 +2,15 @@
   "name": "@cliptown/client",
   "version": "0.1.0",
   "type": "module",
-  "exports": "./dist/index.js",
+  "exports": {
+    ".": {"types": "./dist/index.d.ts", "default": "./dist/index.js"},
+    "./nodejs": {"types": "./dist/runtimes/nodejs.d.ts", "default": "./dist/runtimes/nodejs.js"},
+    "./deno": {"types": "./dist/runtimes/deno.d.ts", "default": "./dist/runtimes/deno.js"},
+    "./bun": {"types": "./dist/runtimes/bun.d.ts", "default": "./dist/runtimes/bun.js"},
+    "./edge": {"types": "./dist/runtimes/edge.d.ts", "default": "./dist/runtimes/edge.js"}
+  },
   "types": "./dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
+  "files": ["dist"],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
