@@ -10,7 +10,11 @@
     "./clipboard": {
       "types": "./dist/clipboard.d.ts",
       "import": "./dist/clipboard.js"
-    }
+    },
+    "./nodejs": {"types": "./dist/runtimes/nodejs.d.ts", "default": "./dist/runtimes/nodejs.js"},
+    "./deno": {"types": "./dist/runtimes/deno.d.ts", "default": "./dist/runtimes/deno.js"},
+    "./bun": {"types": "./dist/runtimes/bun.d.ts", "default": "./dist/runtimes/bun.js"},
+    "./edge": {"types": "./dist/runtimes/edge.d.ts", "default": "./dist/runtimes/edge.js"}
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
