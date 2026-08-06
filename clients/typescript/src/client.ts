@@ -1,6 +1,22 @@
 import type { ClipEnvelope, SearchRequest } from '@cliptown/interfaces';
 import { validateClipEnvelope } from '@cliptown/interfaces';
 
+/**
+ * A non-2xx response.
+ *
+ * The message carries only the status and the request path. It deliberately
+ * omits the response body: this error propagates into host application logs
+ * and crash reports — MemeBank embeds this client — and a server error body
+ * can contain a token, an email, or clip metadata that must not be duplicated
+ * there. Callers that genuinely need the body should read it from `response`.
+ */
+export class CliptownApiError extends Error {
+  constructor(readonly status: number, readonly path: string) {
+    super(`ClipTown API ${status} for ${path}`);
+    this.name = 'CliptownApiError';
+  }
+}
+
 export interface AccessTokenProvider { accessToken(): Promise<string> }
 export interface ClipPage { items: ClipEnvelope[]; next_cursor: string | null }
 export interface PushRequest { mutations: ClipEnvelope[]; cursor?: string | null }
@@ -26,9 +42,13 @@ export class CliptownClient {
     const token = await this.#tokens.accessToken();
     const response = await this.#fetch(`${this.#endpoint}${path}`, {
       ...init,
+      // Never chase a redirect while holding a bearer token. Cross-origin hops
+      // drop the header per the Fetch spec, but a same-origin bounce to an
+      // attacker-controlled path would keep it.
+      redirect: 'error',
       headers: { accept: 'application/json', authorization: `Bearer ${token}`, ...init.headers },
     });
-    if (!response.ok) throw new Error(`ClipTown API ${response.status}: ${await response.text()}`);
+    if (!response.ok) throw new CliptownApiError(response.status, path);
     return response.status === 204 ? undefined as T : await response.json() as T;
   }
 
