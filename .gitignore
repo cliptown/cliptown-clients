@@ -4,3 +4,7 @@ dist/
 .dart_tool/
 .packages
 .DS_Store
+tmp
+temp
+tmp/worktrees
+temp/worktrees
