@@ -1,8 +1,17 @@
 {
-  "name": "cliptown/client",
+  "autoload": {
+    "psr-4": {
+      "ClipTown\\": "src/",
+      "ZedPkg\\Cliptown\\\\": "src/"
+    }
+  },
   "description": "ClipTown HTTP client",
   "license": "MIT",
-  "type": "library",
-  "require": {"php": ">=8.2", "ext-curl": "*", "ext-json": "*"},
-  "autoload": {"psr-4": {"ClipTown\\": "src/"}}
+  "name": "cliptown/client",
+  "require": {
+    "ext-curl": "*",
+    "ext-json": "*",
+    "php": ">=8.2"
+  },
+  "type": "library"
 }
