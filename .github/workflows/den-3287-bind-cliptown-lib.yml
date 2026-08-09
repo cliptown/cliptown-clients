@@ -1,0 +1,68 @@
+name: DEN-3287 bind canonical cliptown-lib
+
+on:
+  push:
+    branches:
+      - agent/standardize-zed-client-matrix-20260805
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: den-3287-bind-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bind:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out client branch
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: agent/standardize-zed-client-matrix-20260805
+          path: workspace/cliptown-clients
+          persist-credentials: true
+          show-progress: false
+      - name: Check out exact interfaces sibling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: cliptown/cliptown-interfaces
+          ref: ec4f820bcc9181c2423a6963d3890ddc8ef18b97
+          path: workspace/cliptown-interfaces
+          persist-credentials: false
+          show-progress: false
+      - name: Set up Rust 1.88
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          toolchain: 1.88.0
+          components: rustfmt, clippy
+      - name: Generate Cargo lock and qualify shared policy
+        working-directory: workspace/cliptown-clients/clients/rust
+        run: |
+          set -euo pipefail
+          cargo generate-lockfile
+          cargo fmt --all
+          cargo metadata --locked --format-version 1 --no-deps >/dev/null
+          cargo clippy --locked --all-targets -- -D warnings
+          cargo test --locked --all-targets -- --nocapture
+          grep -F 'git+https://github.com/cliptown/cliptown-lib' Cargo.lock
+          grep -F 'eafe227afad95b75673c3e9b704cf9cc3bc2ee9d' Cargo.lock
+      - name: Remove one-shot workflow and commit generated state
+        working-directory: workspace/cliptown-clients
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm .github/workflows/den-3287-bind-cliptown-lib.yml
+          git add \
+            clients/rust/Cargo.lock \
+            clients/rust/Cargo.toml \
+            clients/rust/src \
+            clients/rust/tests \
+            .github/workflows/ci.yml \
+            README.md \
+            scripts/package-dry-run.mjs
+          git commit -m 'build(DEN-3287): lock canonical cliptown-lib consumer seam'
+          git push origin HEAD:agent/standardize-zed-client-matrix-20260805
