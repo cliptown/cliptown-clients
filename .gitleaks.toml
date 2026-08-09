@@ -1,0 +1,8 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Documented synthetic wrapped-key value in the cross-language security fixture"
+condition = "AND"
+paths = ['''^fixtures/security-models\.json$''']
+regexes = ['''d3JhcHBlZC1jb250ZW50LWtleQ==''']
