@@ -1,8 +1,8 @@
 use cliptown_client_rust::shared_policy::{
-    CLIPTOWN_API_AUDIENCE, CLIPTOWN_LIB_REVISION, DelegatedClaims, DelegationError,
+    authorize_delegated_operation, evaluate_idempotency, DelegatedClaims, DelegationError,
     DelegationPolicy, IdempotencyBinding, IdempotencyDecision, IdempotencyError,
-    IdempotentOperation, LOA2_ASSURANCE_CONTEXT, MEMEBANK_CLIENT_ID, MEMEBANK_READ_SCOPE,
-    MEMEBANK_WRITE_SCOPE, Operation, authorize_delegated_operation, evaluate_idempotency,
+    IdempotentOperation, Operation, CLIPTOWN_API_AUDIENCE, CLIPTOWN_LIB_REVISION,
+    LOA2_ASSURANCE_CONTEXT, MEMEBANK_CLIENT_ID, MEMEBANK_READ_SCOPE, MEMEBANK_WRITE_SCOPE,
 };
 
 const NOW: i64 = 1_800_000_000;
