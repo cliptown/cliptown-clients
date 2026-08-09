@@ -1,83 +1,138 @@
 name: clients-ci
-on: {pull_request: {}, push: {branches: [main]}}
-permissions: {contents: read}
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: clients-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  rust:
-    runs-on: ubuntu-latest
+  zed-graph:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
-        with: {path: cliptown-clients}
-      - id: interfaces-ref
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
+      - name: Validate canonical package graph
         shell: bash
-        env: {CANDIDATE: "${{ github.head_ref }}"}
         run: |
-          ref=main
-          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
-          echo "ref=$ref" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+          set -euo pipefail
+          python3 - <<'PY'
+          import pathlib
+          import tomllib
+
+          root = pathlib.Path('.')
+          manifest = tomllib.loads((root / '.zpkg.toml').read_text())
+          lock = tomllib.loads((root / '.zpkg.lock').read_text())
+          assert manifest['dependencies'] == {
+              'cliptown/cliptown-interfaces': '^0.1.0',
+              'cliptown/cliptown-lib': '^0.1.0',
+          }
+          assert lock.get('version') == 1
+          PY
+          grep -F 'eafe227afad95b75673c3e9b704cf9cc3bc2ee9d' clients/rust/Cargo.toml
+          grep -F 'https://github.com/cliptown/cliptown-lib' clients/rust/Cargo.lock
+          grep -F 'eafe227afad95b75673c3e9b704cf9cc3bc2ee9d' clients/rust/Cargo.lock
+          grep -F 'pub mod shared_policy;' clients/rust/src/lib.rs
+
+  rust:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cliptown-clients
+          persist-credentials: false
+          show-progress: false
+      - name: Check out exact interfaces sibling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: cliptown/cliptown-interfaces
-          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          ref: ec4f820bcc9181c2423a6963d3890ddc8ef18b97
           path: cliptown-interfaces
-      - uses: dtolnay/rust-toolchain@stable
-        with: {components: rustfmt, clippy}
-      - name: Verify dependency graph
+          persist-credentials: false
+          show-progress: false
+      - name: Set up Rust 1.88
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          toolchain: 1.88.0
+          components: rustfmt, clippy
+      - name: Verify locked dependency graph
         working-directory: cliptown-clients/clients/rust
-        run: cargo metadata --format-version 1 --no-deps >/dev/null
+        run: cargo metadata --locked --format-version 1 --no-deps >/dev/null
       - name: Rust formatting
         working-directory: cliptown-clients/clients/rust
-        run: cargo fmt --check
+        run: cargo fmt --all --check
       - name: Rust Clippy
         working-directory: cliptown-clients/clients/rust
-        run: cargo clippy --all-targets --message-format=short -- -D warnings
-      - name: Rust tests
+        run: cargo clippy --locked --all-targets --message-format=short -- -D warnings
+      - name: Rust tests and shared-policy conformance
         working-directory: cliptown-clients/clients/rust
-        env: {RUST_BACKTRACE: "1"}
-        run: cargo test --all-targets -- --nocapture
+        env:
+          RUST_BACKTRACE: '1'
+        run: cargo test --locked --all-targets -- --nocapture
 
   typescript:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with: {path: cliptown-clients}
-      - id: interfaces-ref
-        shell: bash
-        env: {CANDIDATE: "${{ github.head_ref }}"}
-        run: |
-          ref=main
-          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
-          echo "ref=$ref" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cliptown-clients
+          persist-credentials: false
+          show-progress: false
+      - name: Check out exact interfaces sibling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: cliptown/cliptown-interfaces
-          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          ref: ec4f820bcc9181c2423a6963d3890ddc8ef18b97
           path: cliptown-interfaces
-      - uses: actions/setup-node@v4
-        with: {node-version: 22, cache: npm, cache-dependency-path: cliptown-clients/clients/typescript/package.json}
-      - working-directory: cliptown-interfaces/generated/typescript
+          persist-credentials: false
+          show-progress: false
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: cliptown-clients/clients/typescript/package.json
+      - name: Build interfaces
+        working-directory: cliptown-interfaces/generated/typescript
         run: npm install && npm run build
-      - working-directory: cliptown-clients/clients/typescript
+      - name: Validate TypeScript client
+        working-directory: cliptown-clients/clients/typescript
         run: npm install && npm run typecheck && npm test && npm run build
 
   dart:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v4
-        with: {path: cliptown-clients}
-      - id: interfaces-ref
-        shell: bash
-        env: {CANDIDATE: "${{ github.head_ref }}"}
-        run: |
-          ref=main
-          if [[ -n "$CANDIDATE" ]] && git ls-remote --exit-code --heads https://github.com/cliptown/cliptown-interfaces.git "$CANDIDATE" >/dev/null 2>&1; then ref="$CANDIDATE"; fi
-          echo "ref=$ref" >> "$GITHUB_OUTPUT"
-      - uses: actions/checkout@v4
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cliptown-clients
+          persist-credentials: false
+          show-progress: false
+      - name: Check out exact interfaces sibling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: cliptown/cliptown-interfaces
-          ref: ${{ steps.interfaces-ref.outputs.ref }}
+          ref: ec4f820bcc9181c2423a6963d3890ddc8ef18b97
           path: cliptown-interfaces
-      - uses: dart-lang/setup-dart@v1
+          persist-credentials: false
+          show-progress: false
+      - name: Set up Dart 3.12.2
+        uses: dart-lang/setup-dart@v1
         with:
           sdk: 3.12.2
       - name: Resolve Dart dependencies
@@ -96,24 +151,42 @@ jobs:
         run: dart test --reporter=expanded
 
   package-layout:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v4
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          show-progress: false
       - run: ./scripts/validate-layout.sh
 
   package-dry-run:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@v4
-        with: {path: cliptown-clients}
-      - uses: actions/checkout@v4
+      - name: Check out clients
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          path: cliptown-clients
+          persist-credentials: false
+          show-progress: false
+      - name: Check out exact interfaces sibling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: cliptown/cliptown-interfaces
-          ref: main
+          ref: ec4f820bcc9181c2423a6963d3890ddc8ef18b97
           path: cliptown-interfaces
-      - uses: actions/setup-node@v4
-        with: {node-version: 22}
-      - uses: dtolnay/rust-toolchain@stable
+          persist-credentials: false
+          show-progress: false
+      - name: Set up Node.js 22
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: 22
+      - name: Set up Rust 1.88
+        uses: dtolnay/rust-toolchain@4cda84d5c5c54efe2404f9d843567869ab1699d4
+        with:
+          toolchain: 1.88.0
       - name: Build TypeScript package inputs
         run: |
           cd cliptown-interfaces/generated/typescript
@@ -128,14 +201,18 @@ jobs:
       - name: Verify package manifest and checksums
         working-directory: cliptown-clients
         run: |
+          set -euo pipefail
           test -s dist/package-dry-run/package-manifest.json
           test -s dist/package-dry-run/SHA256SUMS
           test "$(find dist/package-dry-run -maxdepth 1 -type f \( -name '*.crate' -o -name '*.tgz' -o -name '*.tar.gz' \) | wc -l)" -eq 3
-          if grep -RInE 'file:|path:' dist/package-dry-run/package-manifest.json; then
-            echo 'workspace-only dependencies leaked into the release plan' >&2
+          jq -e '.packages.rust.dependencies == ["cliptown-interfaces-rust@0.1.0", "cliptown-lib@0.1.0"]' dist/package-dry-run/package-manifest.json
+          jq -e '.packages.zed_pkg.dependencies == ["cliptown/cliptown-interfaces@^0.1.0", "cliptown/cliptown-lib@^0.1.0"]' dist/package-dry-run/package-manifest.json
+          if grep -RInE 'file:|path:|git =|rev =' dist/package-dry-run; then
+            echo 'workspace-only dependency leaked into the release plan' >&2
             exit 1
           fi
-      - uses: actions/upload-artifact@v4
+      - name: Upload package rehearsal
+        uses: actions/upload-artifact@v4
         with:
           name: cliptown-package-dry-run
           path: cliptown-clients/dist/package-dry-run

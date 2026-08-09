@@ -17,6 +17,7 @@ SignalEnvelopePurpose _purposeFromWire(String value) => switch (value) {
       'device_control' => SignalEnvelopePurpose.deviceControl,
       'recovery_package' => SignalEnvelopePurpose.recoveryPackage,
       'acknowledgement' => SignalEnvelopePurpose.acknowledgement,
+      'app_vault_key' => SignalEnvelopePurpose.appVaultKey,
       _ => throw FormatException('unknown Signal envelope purpose: $value'),
     };
 
@@ -27,6 +28,7 @@ String _purposeToWire(SignalEnvelopePurpose value) => switch (value) {
       SignalEnvelopePurpose.deviceControl => 'device_control',
       SignalEnvelopePurpose.recoveryPackage => 'recovery_package',
       SignalEnvelopePurpose.acknowledgement => 'acknowledgement',
+      SignalEnvelopePurpose.appVaultKey => 'app_vault_key',
     };
 
 void main() {
