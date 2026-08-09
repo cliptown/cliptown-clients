@@ -3,6 +3,7 @@ node_modules/
 dist/
 .dart_tool/
 .packages
+.gradle/
 .DS_Store
 tmp
 temp
