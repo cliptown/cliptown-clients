@@ -35,6 +35,12 @@ The Zed manifest retains semantic version requirements; resolver-produced lock
 state must be updated by the Zed CLI after the corresponding package versions
 are published. Lock data must never be synthesized by hand.
 
+The Cargo lock was generated—not hand-edited—by the self-removing DEN-3287
+workflow in run `31301089272`. That run used Rust 1.88, resolved the exact public
+library revision, then passed locked metadata, Clippy with warnings denied, and
+all Rust tests before committing the lock and deleting the writer workflow.
+Permanent read-only CI is the promotion gate for the resulting branch head.
+
 ## Cross-language fixtures
 
 `fixtures/security-models.json` is a ciphertext-only golden fixture for the merged device-unlock, Signal-envelope, and encrypted-object models. Rust, TypeScript, and Dart each load the same file, execute their public validators, and emit the same canonical JSON fields. The fixture contains no private keys, raw biometric material, recovery codes, plaintext clip data, or production identifiers.
