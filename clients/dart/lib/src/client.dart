@@ -49,7 +49,7 @@ class CliptownClient {
       },
     );
     return ClipPage.fromJson(
-      await _decode(await httpClient.get(uri, headers: await _headers())),
+      _decode(await httpClient.get(uri, headers: await _headers())),
     );
   }
 
@@ -66,7 +66,7 @@ class CliptownClient {
       );
     }
     headers['idempotency-key'] = key;
-    final Map<String, Object?> body = await _decode(
+    final Map<String, Object?> body = _decode(
       await httpClient.put(
         Uri.parse('$endpoint/v1/clips/${Uri.encodeComponent(clip.clipId)}'),
         headers: headers,
@@ -77,7 +77,7 @@ class CliptownClient {
   }
 
   Future<void> deleteClip(String clipId) async {
-    await _decode(
+    _decode(
       await httpClient.delete(
         Uri.parse('$endpoint/v1/clips/${Uri.encodeComponent(clipId)}'),
         headers: await _headers(),
@@ -89,7 +89,7 @@ class CliptownClient {
   Future<ClipPage> search(Map<String, Object?> request) async {
     _validateSearchRequest(request);
     return ClipPage.fromJson(
-      await _decode(
+      _decode(
         await httpClient.post(
           Uri.parse('$endpoint/v1/search'),
           headers: await _headers(json: true),
@@ -103,8 +103,9 @@ class CliptownClient {
     List<ClipEnvelope> mutations, {
     String? cursor,
   }) async {
-    if (mutations.length > 500)
+    if (mutations.length > 500) {
       throw ArgumentError('a sync push may contain at most 500 mutations');
+    }
     for (final ClipEnvelope clip in mutations) {
       clip.validate();
     }
@@ -148,7 +149,9 @@ class CliptownClient {
       throw StateError('ClipTown API ${response.statusCode}: ${response.body}');
     }
     if (response.body.isEmpty) {
-      if (allowEmpty) return <String, Object?>{};
+      if (allowEmpty) {
+        return <String, Object?>{};
+      }
       throw const FormatException('ClipTown API returned an empty response');
     }
     return (jsonDecode(response.body) as Map<Object?, Object?>)
@@ -173,8 +176,9 @@ class CliptownClient {
         request['query_embedding'] as List<Object?>?;
     final Object? rawLimit = request['limit'];
     if (rawLimit != null) {
-      if (rawLimit is! int)
+      if (rawLimit is! int) {
         throw ArgumentError('search limit must be an integer');
+      }
       _validateLimit(rawLimit, 100);
     }
     if (mode == 'local_only' && (blindTerms.isNotEmpty || embedding != null)) {
