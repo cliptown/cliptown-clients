@@ -39,7 +39,12 @@ The Cargo lock was generated—not hand-edited—by the self-removing DEN-3287
 workflow in run `31301089272`. That run used Rust 1.88, resolved the exact public
 library revision, then passed locked metadata, Clippy with warnings denied, and
 all Rust tests before committing the lock and deleting the writer workflow.
-Permanent read-only CI is the promotion gate for the resulting branch head.
+
+Permanent read-only run `31301299064` passed the exact Zed graph, Rust 1.88
+locked metadata/format/Clippy/shared-policy tests, TypeScript build/tests, Dart
+format/analyze/tests, package layout, and registry-independent release
+rehearsals. The run also caught and drove the semantic Dart update for the
+`app_vault_key` Signal envelope purpose rather than weakening analyzer checks.
 
 ## Cross-language fixtures
 
