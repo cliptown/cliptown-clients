@@ -8,6 +8,7 @@ repository = "https://github.com/cliptown/cliptown-clients"
 [dependencies]
 async-trait = "0.1"
 cliptown-interfaces-rust = { path = "../../../cliptown-interfaces/generated/rust" }
+cliptown-lib = { git = "https://github.com/cliptown/cliptown-lib", rev = "5c68349aadc5fb44c60f365ad457b58c42ed5d27", package = "cliptown-lib" }
 hmac = "0.12"
 hex = "0.4"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }

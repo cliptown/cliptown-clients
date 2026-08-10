@@ -72,12 +72,22 @@ const rustSource = join(root, 'clients', 'rust');
 const rustManifestText = readFileSync(join(rustSource, 'Cargo.toml'), 'utf8');
 const rustName = match(rustManifestText, /^name = "([^"]+)"$/m, 'Rust package name');
 const rustVersion = match(rustManifestText, /^version = "([^"]+)"$/m, 'Rust package version');
-const rustReleaseManifest = rustManifestText.replace(
+const interfaceReleaseManifest = rustManifestText.replace(
   /cliptown-interfaces-rust = \{ path = "[^"]+" \}/,
   'cliptown-interfaces-rust = "0.1.0"',
 );
-if (rustReleaseManifest === rustManifestText || /\bpath\s*=/.test(rustReleaseManifest)) {
-  fail('Rust release manifest still contains a workspace-only path dependency');
+if (interfaceReleaseManifest === rustManifestText) {
+  fail('Rust interface dependency was not converted to a release requirement');
+}
+const rustReleaseManifest = interfaceReleaseManifest.replace(
+  /cliptown-lib = \{ git = "https:\/\/github\.com\/cliptown\/cliptown-lib", rev = "[0-9a-f]{40}", package = "cliptown-lib" \}/,
+  'cliptown-lib = "0.1.0"',
+);
+if (rustReleaseManifest === interfaceReleaseManifest) {
+  fail('Rust cliptown-lib dependency was not converted to a release requirement');
+}
+if (/\b(?:path|git|rev)\s*=/.test(rustReleaseManifest)) {
+  fail('Rust release manifest still contains a workspace-only or VCS dependency');
 }
 const rustWorkspace = join(workspace, 'rust');
 const rustPackageName = `${rustName}-${rustVersion}`;
@@ -154,12 +164,36 @@ const releasePlan = {
   packages: {
     rust: {
       name: rustName,
-      dependency: 'cliptown-interfaces-rust@0.1.0',
-      registry_validation: 'blocked_until_interface_crate_is_published',
+      dependencies: [
+        'cliptown-interfaces-rust@0.1.0',
+        'cliptown-lib@0.1.0',
+      ],
+      registry_validation: 'blocked_until_interface_and_library_crates_are_published',
     },
     typescript: {name: typescriptName, dependency: '@cliptown/interfaces@0.1.0'},
     dart: {name: dartName, dependency: 'cliptown_interfaces@^0.1.0'},
-    zed_pkg: {name: 'cliptown/cliptown-clients', targets: ['rust', 'nodejs', 'dart']},
+    zed_pkg: {
+      name: 'cliptown/cliptown-clients',
+      dependencies: ['cliptown/cliptown-interfaces@^0.1.0', 'cliptown/cliptown-lib@^0.1.0'],
+      targets: [
+        'c',
+        'cpp',
+        'zig',
+        'nodejs',
+        'golang',
+        'python',
+        'ruby',
+        'php',
+        'rust',
+        'dart',
+        'gleam',
+        'erlang',
+        'elixir',
+        'java',
+        'kotlin',
+        'swift',
+      ],
+    },
   },
   artifacts,
 };
