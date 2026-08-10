@@ -4,6 +4,8 @@ dist/
 .dart_tool/
 .packages
 .gradle/
+__pycache__/
+*.py[cod]
 .DS_Store
 tmp
 temp
