@@ -1,0 +1,10 @@
+{
+  "apiSurface": "clients/api-surface.json",
+  "apiSurfaceSha256": "75ee63316ac91678a79efc5c8cd6147c3b4b5a8d0e5c44486ffcdecc44d4ea91",
+  "coordinate": "cliptown/cliptown-clients",
+  "runtime": "kotlin",
+  "schemaId": "https://zpkg.tech/schemas/client-api.schema.json",
+  "schemaVersion": 1,
+  "target": "kotlin",
+  "zedTarget": "kotlin"
+}
