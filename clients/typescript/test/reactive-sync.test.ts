@@ -188,7 +188,7 @@ test('has-more without cursor progress fails closed', async () => {
   }
 });
 
-test('multi-page cursor cycles fail before refetching an accepted page', async () => {
+test('multi-page cursor cycles fail before replaying an accepted page', async () => {
   const seen: Array<string | null> = [];
   const port: SyncPullPort = {
     async pull(request = {}): Promise<PullResponse> {
@@ -197,7 +197,7 @@ test('multi-page cursor cycles fail before refetching an accepted page', async (
       if (cursor === null) return page('A', true);
       if (cursor === 'A') return page('B', true);
       if (cursor === 'B') return page('A', true);
-      throw new Error('unexpected cursor');
+      throw new Error('unexpected fourth request');
     },
   };
 
@@ -207,13 +207,11 @@ test('multi-page cursor cycles fail before refetching an accepted page', async (
     ),
   );
 
-  // The third accepted page points back to A. Reject that cycle before a
-  // fourth request can re-pull A and replay already accepted pagination work.
   assert.deepEqual(seen, [null, 'A', 'B']);
   assert.deepEqual(snapshots.at(-1), {
     phase: 'failed',
-    cursor: 'A',
-    receivedPages: 3,
+    cursor: 'B',
+    receivedPages: 2,
     receivedMutations: 0,
     failure: { kind: 'contract' },
   });
