@@ -236,7 +236,12 @@ def main() -> None:
             entry.get("implementationFileCount") != implementation_file_count
             or entry.get("implementationSha256") != implementation_digest
         ):
-            fail(f"target {target} implementation source or export metadata drifted")
+            fail(
+                f"target {target} implementation source or export metadata drifted: "
+                f"declared files={entry.get('implementationFileCount')} "
+                f"sha256={entry.get('implementationSha256')}; "
+                f"actual files={implementation_file_count} sha256={implementation_digest}"
+            )
         declared_dirs.append(directory)
 
         marker = marker_root(directory, runtime)
