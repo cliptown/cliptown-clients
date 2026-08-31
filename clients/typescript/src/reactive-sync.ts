@@ -4,6 +4,7 @@ import {
   Observable,
   catchError,
   concat,
+  defer,
   distinctUntilChanged,
   endWith,
   expand,
@@ -184,24 +185,32 @@ export function observeSyncPull(
     cursor: initialCursor,
   });
 
-  const pages = pullPage(
-    port,
-    request,
-    initialCursor,
-    retryPolicy,
-    scheduler,
-  ).pipe(
-    expand((current) => {
-      if (!current.page.has_more) return EMPTY;
-      const nextCursor = current.page.cursor;
-      if (nextCursor === null || nextCursor === current.requestedCursor) {
-        throw new CliptownContractError(
-          'sync cursor must advance while more pages are available',
-        );
-      }
-      return pullPage(port, request, nextCursor, retryPolicy, scheduler);
-    }),
-  );
+  const pages = defer(() => {
+    // Cursor history belongs to one source execution. Keeping it inside defer
+    // makes a refCount teardown followed by a new cold execution start with a
+    // fresh history instead of inheriting state from the previous subscriber.
+    const requestedCursors = new Set<string | null>([initialCursor]);
+
+    return pullPage(
+      port,
+      request,
+      initialCursor,
+      retryPolicy,
+      scheduler,
+    ).pipe(
+      expand((current) => {
+        if (!current.page.has_more) return EMPTY;
+        const nextCursor = current.page.cursor;
+        if (nextCursor === null || requestedCursors.has(nextCursor)) {
+          throw new CliptownContractError(
+            'sync cursor must advance while more pages are available',
+          );
+        }
+        requestedCursors.add(nextCursor);
+        return pullPage(port, request, nextCursor, retryPolicy, scheduler);
+      }),
+    );
+  });
 
   const events = concat(
     of<SyncPullEvent>(Object.freeze({ type: 'started', cursor: initialCursor })),
