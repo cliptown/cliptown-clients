@@ -11,10 +11,22 @@
       "types": "./dist/clipboard.d.ts",
       "import": "./dist/clipboard.js"
     },
-    "./nodejs": {"types": "./dist/runtimes/nodejs.d.ts", "default": "./dist/runtimes/nodejs.js"},
-    "./deno": {"types": "./dist/runtimes/deno.d.ts", "default": "./dist/runtimes/deno.js"},
-    "./bun": {"types": "./dist/runtimes/bun.d.ts", "default": "./dist/runtimes/bun.js"},
-    "./edge": {"types": "./dist/runtimes/edge.d.ts", "default": "./dist/runtimes/edge.js"}
+    "./nodejs": {
+      "types": "./dist/runtimes/nodejs.d.ts",
+      "default": "./dist/runtimes/nodejs.js"
+    },
+    "./deno": {
+      "types": "./dist/runtimes/deno.d.ts",
+      "default": "./dist/runtimes/deno.js"
+    },
+    "./bun": {
+      "types": "./dist/runtimes/bun.d.ts",
+      "default": "./dist/runtimes/bun.js"
+    },
+    "./edge": {
+      "types": "./dist/runtimes/edge.d.ts",
+      "default": "./dist/runtimes/edge.js"
+    }
   },
   "types": "./dist/index.d.ts",
   "main": "./dist/index.js",
@@ -25,7 +37,10 @@
     "build": "npm run build:interfaces && tsc -p tsconfig.build.json",
     "build:interfaces": "npm --prefix ../../../cliptown-interfaces/generated/typescript run build",
     "typecheck": "tsc --noEmit",
-    "test": "node --import tsx --test test/**/*.test.ts"
+    "test": "node --import tsx --test test/**/*.test.ts",
+    "lint:ores": "if [ -f ../../.ores-lint/lint.sh ]; then sh ../../.ores-lint/lint.sh; else echo 'ores-lint not installed'; fi",
+    "prepublishOnly": "npm run lint:ores",
+    "prebuild": "npm run lint:ores"
   },
   "dependencies": {
     "@cliptown/interfaces": "file:../../../cliptown-interfaces/generated/typescript"
@@ -34,5 +49,13 @@
     "tsx": "^4.19.0",
     "typescript": "^5.7.0",
     "@types/node": "^22.10.0"
+  },
+  "oresLint": {
+    "note": "Declared, not installed. ores-lint resolves these from a global install - see .ores-lint/README.md",
+    "requires": {
+      "eslint": ">=9",
+      "typescript-eslint": ">=8 (optional; without it .ts files are skipped)"
+    },
+    "install": "npm i -g eslint typescript-eslint"
   }
 }
