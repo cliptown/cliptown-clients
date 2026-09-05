@@ -1,0 +1,26 @@
+[package]
+org = "cliptown"
+name = "cliptown-validation-consumer"
+version = "0.1.0"
+description = "Client adapters for cliptown-lib-core public validation SDKs"
+license = "MIT"
+
+[dependencies]
+"cliptown/cliptown-lib-core" = "^0.1.0"
+"cliptown/cliptown-interfaces" = "^0.1.0"
+
+[targets.typescript]
+dir = "typescript"
+adapter = "node"
+
+[targets.rust]
+dir = "rust"
+adapter = "rust"
+
+[targets.golang]
+dir = "golang"
+adapter = "none"
+
+[targets.gleam]
+dir = "gleam"
+adapter = "none"

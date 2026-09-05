@@ -20,6 +20,10 @@ jobs:
         with: {python-version: "3.12"}
       - name: Validate canonical Zed matrix
         run: python3 scripts/check-polyglot-matrix.py
+      - name: Validate every SDK against the JSON-Schema API contract
+        run: |
+          python3 -m pip install --disable-pip-version-check jsonschema==4.25.1
+          python3 scripts/verify_client_contract.py
       - name: Compile C11 slice
         run: cc -std=c11 -Wall -Wextra -Werror -Iclients/c/include -c clients/c/src/client.c -o /tmp/cliptown-client-c.o
       - name: Compile C++17 slice

@@ -1,6 +1,6 @@
 {
   "apiSurface": "clients/api-surface.json",
-  "apiSurfaceSha256": "75ee63316ac91678a79efc5c8cd6147c3b4b5a8d0e5c44486ffcdecc44d4ea91",
+  "apiSurfaceSha256": "989e2dbc7f685b2aeffaea2c900ef858c007beb4ceff03042317a980c5516e31",
   "coordinate": "cliptown/cliptown-clients",
   "runtime": "nodejs",
   "schemaId": "https://zpkg.tech/schemas/client-api.schema.json",
