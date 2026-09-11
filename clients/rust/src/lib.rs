@@ -1,6 +1,7 @@
 mod blind_index;
 mod client;
 mod error;
+pub mod shared_policy;
 mod transport;
 
 pub use blind_index::blind_terms;
