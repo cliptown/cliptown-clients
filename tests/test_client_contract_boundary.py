@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import sys
 import unittest
 from pathlib import Path
@@ -44,6 +45,32 @@ class ClientContractBoundaryTest(unittest.TestCase):
         )
         self.assertGreaterEqual(len(names), 15, names)
         self.assertEqual((), missing_core_targets(names), names)
+
+    def test_tracked_client_paths_have_no_casefold_collisions(self) -> None:
+        """Keep one source tree valid on case-sensitive and insensitive hosts."""
+
+        result = subprocess.run(
+            ["git", "ls-files", "-z", "--", "clients"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+        )
+        paths = [
+            value.decode("utf-8")
+            for value in result.stdout.split(b"\0")
+            if value
+        ]
+        by_casefold: dict[str, list[str]] = {}
+        for path in paths:
+            by_casefold.setdefault(path.casefold(), []).append(path)
+
+        collisions = [values for values in by_casefold.values() if len(values) > 1]
+        self.assertEqual(
+            [],
+            collisions,
+            "tracked client paths differ only by case and cannot be checked out "
+            "portably",
+        )
 
 
 if __name__ == "__main__":

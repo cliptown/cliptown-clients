@@ -212,10 +212,16 @@ export class CliptownClient {
     });
   }
 
-  pull(request: PullRequest = {}): Promise<PullResponse> {
+  pull(
+    request: Readonly<PullRequest> = {},
+    options: Readonly<{ signal?: AbortSignal }> = {},
+  ): Promise<PullResponse> {
     if (request.limit != null) assertLimit(request.limit, 500);
     return this.#request('/v1/sync/pull', {
-      method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(request),
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(request),
+      ...(options.signal === undefined ? {} : { signal: options.signal }),
     });
   }
 
