@@ -1,0 +1,11 @@
+{
+  "apiSurfaceSha256": "989e2dbc7f685b2aeffaea2c900ef858c007beb4ceff03042317a980c5516e31",
+  "changed": [],
+  "errors": [],
+  "minimumTargets": 15,
+  "mode": "write",
+  "prefix": "cliptown",
+  "repository": "cliptown/cliptown-clients",
+  "schemaVersion": 1,
+  "standardTargets": 20
+}
