@@ -41,39 +41,43 @@ adapter = "none"
 # exports beneath src/runtimes so Zed target re-rooting preserves shared source.
 [targets.nodejs]
 dir = "clients/typescript"
-name = "@cliptown/client"
 adapter = "node"
 
 [targets.golang]
 dir = "clients/go"
-adapter = "go"
+adapter = "none"
 
 [targets.python]
 dir = "clients/python"
-adapter = "python"
+adapter = "none"
 
 [targets.ruby]
 dir = "clients/ruby"
+adapter = "none"
 
 [targets.php]
 dir = "clients/php"
+adapter = "none"
 
 [targets.rust]
 dir = "clients/rust"
-adapter = "rust"
+adapter = "none"
 
 [targets.dart]
 dir = "clients/dart"
-adapter = "dart"
+adapter = "none"
 
 [targets.gleam]
 dir = "clients/gleam"
+adapter = "none"
 
 [targets.erlang]
 dir = "clients/erlang"
+adapter = "none"
 
 [targets.elixir]
 dir = "clients/elixir"
+adapter = "none"
 
 [targets.java]
 dir = "clients/java"
@@ -85,3 +89,8 @@ adapter = "java"
 
 [targets.swift]
 dir = "clients/swift"
+adapter = "none"
+
+[targets.rust-wasm]
+dir = "clients/wasm"
+adapter = "node"

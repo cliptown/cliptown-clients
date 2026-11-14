@@ -11,6 +11,10 @@
       "types": "./dist/clipboard.d.ts",
       "import": "./dist/clipboard.js"
     },
+    "./reactive": {
+      "types": "./dist/reactive-sync.d.ts",
+      "import": "./dist/reactive-sync.js"
+    },
     "./nodejs": {
       "types": "./dist/runtimes/nodejs.d.ts",
       "default": "./dist/runtimes/nodejs.js"
@@ -43,7 +47,8 @@
     "prebuild": "npm run lint:ores"
   },
   "dependencies": {
-    "@cliptown/interfaces": "file:../../../cliptown-interfaces/generated/typescript"
+    "@cliptown/interfaces": "file:../../../cliptown-interfaces/generated/typescript",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
     "tsx": "^4.19.0",

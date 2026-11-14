@@ -27,7 +27,10 @@ with (ROOT / ".zpkg.toml").open("rb") as handle:
     manifest = tomllib.load(handle)
 with (ROOT / ".zpkg.lock").open("rb") as handle:
     lock = tomllib.load(handle)
-assert manifest["dependencies"] == {"cliptown/cliptown-interfaces": "^0.1.0"}
+assert manifest["dependencies"] == {
+    "cliptown/cliptown-interfaces": "^0.1.0",
+    "cliptown/cliptown-lib": "^0.1.0",
+}
 assert lock["version"] == 1
 assert set(manifest["targets"]) == {"repository", *REQUIRED}
 for target, (directory, sentinel) in REQUIRED.items():

@@ -4,8 +4,14 @@ dist/
 .dart_tool/
 .packages
 .gradle/
+__pycache__/
+*.py[cod]
 .DS_Store
 tmp
 temp
 tmp/worktrees
 temp/worktrees
+
+# Sanctioned scratch locations - AGENTS.md requires both, trailing-slash form
+tmp/
+temp/

@@ -1,0 +1,5 @@
+{
+  "exports": "./mod.ts",
+  "name": "@cliptown/cliptown-client-deno",
+  "version": "0.1.0"
+}
