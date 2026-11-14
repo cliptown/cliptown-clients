@@ -114,7 +114,7 @@
       "coordinate": "cliptown/cliptown-clients",
       "dir": "clients/rust",
       "implementationFileCount": 7,
-      "implementationSha256": "81afb0840a16191bf4cac9cd847c971399b8547babc4cef40ecd204af4249e00",
+      "implementationSha256": "a45ee97887359adf72e4d53c5722f3f2474b4b3a9b15ce5064f56019532f0311",
       "runtime": "rust",
       "schemaId": "https://zpkg.tech/schemas/client-api.schema.json",
       "schemaVersion": 1,
