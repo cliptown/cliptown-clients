@@ -52,7 +52,10 @@ mod tests {
 
     #[test]
     fn unique_terms_remain_capped_at_256() {
-        let words = (0..300).map(|n| format!("term{n}")).collect::<Vec<_>>().join(" ");
+        let words = (0..300)
+            .map(|n| format!("term{n}"))
+            .collect::<Vec<_>>()
+            .join(" ");
         assert_eq!(blind_terms(b"stable-search-key", &words).len(), 256);
     }
 
