@@ -8,22 +8,20 @@ type HmacSha256 = Hmac<Sha256>;
 /// The server cannot reverse these values without the per-user search key.
 pub fn blind_terms(search_key: &[u8], plaintext: &str) -> Vec<String> {
     let normalized = plaintext.nfkc().collect::<String>().to_lowercase();
-    // Bound unique terms, not raw occurrences: repeated clipboard words must
-    // not crowd distinct search terms out of the 256-term envelope.
-    let mut seen = std::collections::HashSet::new();
-    let mut words = Vec::new();
-    for word in normalized
+    // Keep the first 256 unique words, then emit sorted, keyed digests.
+    // Functional iterator state avoids introducing new mutable bindings.
+    let words: std::collections::BTreeSet<_> = normalized
         .split(|character: char| !character.is_alphanumeric())
         .filter(|word| word.len() >= 2)
-    {
-        if seen.insert(word) {
-            words.push(word);
-            if words.len() == 256 {
-                break;
+        .scan(std::collections::HashSet::new(), |seen, word| {
+            if seen.len() >= 256 {
+                None
+            } else {
+                Some(seen.insert(word).then_some(word))
             }
-        }
-    }
-    words.sort_unstable();
+        })
+        .flatten()
+        .collect();
     words
         .into_iter()
         .map(|word| {
