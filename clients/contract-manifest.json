@@ -2,7 +2,7 @@
   "apiSurfaceSha256": "989e2dbc7f685b2aeffaea2c900ef858c007beb4ceff03042317a980c5516e31",
   "coordinate": "cliptown/cliptown-clients",
   "schemaVersion": 1,
-  "targetCount": 23,
+  "targetCount": 24,
   "targets": [
     {
       "apiSurface": "clients/api-surface.json",
@@ -302,6 +302,19 @@
       "schemaVersion": 1,
       "target": "extension-python3",
       "zedTarget": "extension-python3"
+    },
+    {
+      "apiSurface": "clients/api-surface.json",
+      "apiSurfaceSha256": "989e2dbc7f685b2aeffaea2c900ef858c007beb4ceff03042317a980c5516e31",
+      "coordinate": "cliptown/cliptown-clients",
+      "dir": "clients/atto",
+      "implementationFileCount": 1,
+      "implementationSha256": "b603d9f340416b9d198092d8d0931374f0eb51049cc7723e23e8411a55c548fd",
+      "runtime": "atto",
+      "schemaId": "https://zpkg.tech/schemas/client-api.schema.json",
+      "schemaVersion": 1,
+      "target": "atto",
+      "zedTarget": "atto"
     }
   ]
 }

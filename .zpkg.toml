@@ -94,3 +94,8 @@ adapter = "none"
 [targets.rust-wasm]
 dir = "clients/wasm"
 adapter = "node"
+
+# AttoLang source-only target; executable transport and compiler conformance are gated.
+[targets.atto]
+dir = "clients/atto"
+adapter = "none"
