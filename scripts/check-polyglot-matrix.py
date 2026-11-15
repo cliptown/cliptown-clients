@@ -7,6 +7,7 @@ import tomllib
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 REQUIRED = {
     "atto": ("clients/atto", "src/cliptown.atto"),
+    "rust-wasm": ("clients/wasm", "Cargo.toml"),
     "c": ("clients/c", "CMakeLists.txt"),
     "cpp": ("clients/cpp", "CMakeLists.txt"),
     "zig": ("clients/zig", "build.zig"),
