@@ -3,6 +3,7 @@ interfaces_package = "cliptown-interfaces"
 shared_library_package = "cliptown-lib"
 
 [targets]
+atto = true
 gleamlang = true
 erlang = true
 elixir = true

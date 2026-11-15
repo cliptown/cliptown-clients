@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "coordinate": "cliptown/cliptown-clients",
+  "target": "atto",
+  "zedTarget": "atto",
+  "runtime": "atto",
+  "apiSurface": "clients/api-surface.json",
+  "apiSurfaceSha256": "989e2dbc7f685b2aeffaea2c900ef858c007beb4ceff03042317a980c5516e31",
+  "schemaId": "https://zpkg.tech/schemas/client-api.schema.json"
+}

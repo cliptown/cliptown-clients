@@ -1,0 +1,15 @@
+// AttoLang source-only SDK boundary helpers.
+// Check both predicates before passing ciphertext to a caller-supplied transport.
+// This module does not implement HTTP, crypto, key handling, or bearer auth.
+fnc nonnegative_payload_bytes(int byte_length) -> bool {
+    return byte_length >= 0;
+}
+fnc payload_bytes_within_limit(int byte_length) -> bool {
+    return byte_length <= 1048576;
+}
+fnc nonnegative_cursor_bytes(int byte_length) -> bool {
+    return byte_length >= 0;
+}
+fnc cursor_bytes_within_limit(int byte_length) -> bool {
+    return byte_length <= 4096;
+}

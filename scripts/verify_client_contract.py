@@ -27,6 +27,7 @@ FINGERPRINT = CLIENTS / ".api-surface.sha256"
 ZPKG = ROOT / ".zpkg.toml"
 MINIMUM_TARGETS = 15
 SOURCE_SUFFIXES = {
+    ".atto",
     ".c",
     ".cc",
     ".cpp",

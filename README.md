@@ -71,3 +71,7 @@ The command creates registry-independent Rust, npm, and Dart source archives und
 This is a packaging rehearsal, not publication. It does not contact crates.io, npm, pub.dev, Zed Cloud, or GitHub Releases and requires no registry credentials. Real publishing remains blocked until the corresponding interface and library packages, provenance, signing, and protected release workflow are reviewed.
 
 CI enforces the exact shared-library revision; canonical Rust, Dart, and Go formatting; Clippy and Go vet; unit and shared-policy conformance tests; TypeScript typechecking/tests; package-layout validation; and the package dry-run archive contract against the merged interface contract. Rust is pinned to 1.88 and uses the committed Cargo lock. Dart formatting is pinned to SDK 3.12.2 and runs after dependency resolution so local and hosted checks use the package's declared language version.
+
+## AttoLang (.atto) source-only target
+
+The new [AttoLang target](clients/atto/README.md) provides checked local source/cursor byte-count predicates, canonical contract fingerprints, and a registered Zed target. This is **not yet an executable AttoLang HTTP SDK**: compiler, transport, and Zed resolver parity are explicit draft release gates.

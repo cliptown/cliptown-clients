@@ -3,8 +3,13 @@
   "api_surface": "clients/api-surface.json",
   "minimum_targets": 15,
   "schema_version": 1,
-  "standard_target_count": 20,
+  "standard_target_count": 21,
   "targets": {
+    "atto": {
+      "dir": "clients/atto",
+      "runtime": "atto",
+      "zed_target": "atto"
+    },
     "c": {
       "dir": "clients/c",
       "runtime": "c",
