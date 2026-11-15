@@ -37,7 +37,10 @@ fn atto_is_registered_in_every_client_matrix() {
     let targets = manifest["targets"].as_array().expect("targets array");
     assert_eq!(manifest["targetCount"].as_u64(), Some(targets.len() as u64));
     assert_eq!(
-        targets.iter().filter(|entry| entry["target"] == "atto").count(),
+        targets
+            .iter()
+            .filter(|entry| entry["target"] == "atto")
+            .count(),
         1
     );
 
@@ -78,7 +81,10 @@ fn atto_source_receipt_is_cryptographically_bound_to_declared_target() {
     assert_eq!(marker["zedTarget"], "atto");
     assert_eq!(marker["apiSurfaceSha256"], fingerprint);
     assert_eq!(entry["apiSurfaceSha256"], fingerprint);
-    assert_eq!(read("clients/atto/.zed-api-surface.sha256").trim(), fingerprint);
+    assert_eq!(
+        read("clients/atto/.zed-api-surface.sha256").trim(),
+        fingerprint
+    );
 }
 
 #[test]
@@ -97,6 +103,9 @@ fn atto_helpers_are_bounded_without_executable_transport_claims() {
     }
     assert_eq!(source.matches("fnc ").count(), 4);
     for forbidden in ["http_request(", "fetch(", "private_key(", "bearer_token("] {
-        assert!(!source.contains(forbidden), "unexpected transport: {forbidden}");
+        assert!(
+            !source.contains(forbidden),
+            "unexpected transport: {forbidden}"
+        );
     }
 }
