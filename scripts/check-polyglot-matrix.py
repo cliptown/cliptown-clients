@@ -42,4 +42,4 @@ package = json.loads((ROOT / "clients/typescript/package.json").read_text())
 for runtime in ("nodejs", "deno", "bun", "edge"):
     assert f"./{runtime}" in package["exports"]
     assert (ROOT / "clients/typescript/src/runtimes" / f"{runtime}.ts").is_file()
-print("ClipTown client matrix: 17 requested language slices and four TypeScript runtimes")
+print("ClipTown client matrix: 18 Zed target slices (including Atto and Rust WASM) and four TypeScript runtimes")
