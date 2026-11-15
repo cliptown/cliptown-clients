@@ -3,24 +3,23 @@
 use serde_json::Value;
 use std::collections::BTreeSet;
 
-fn collect_named_references(value: &Value, refs: &mut BTreeSet<String>) {
+fn named_references(value: &Value) -> BTreeSet<String> {
     match value {
         Value::Object(map) => {
-            if map.get("kind").and_then(Value::as_str) == Some("named") {
-                if let Some(name) = map.get("name").and_then(Value::as_str) {
-                    refs.insert(name.to_owned());
-                }
-            }
-            for item in map.values() {
-                collect_named_references(item, refs);
-            }
+            let immediate = (map.get("kind").and_then(Value::as_str) == Some("named"))
+                .then(|| map.get("name").and_then(Value::as_str))
+                .flatten();
+            immediate
+                .into_iter()
+                .map(str::to_owned)
+                .chain(map.values().flat_map(|item| named_references(item).into_iter()))
+                .collect()
         }
-        Value::Array(items) => {
-            for item in items {
-                collect_named_references(item, refs);
-            }
-        }
-        _ => {}
+        Value::Array(items) => items
+            .iter()
+            .flat_map(|item| named_references(item).into_iter())
+            .collect(),
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => BTreeSet::new(),
     }
 }
 
@@ -43,7 +42,7 @@ fn public_only(value: &Value) -> Option<Value> {
         Value::Array(values) => Some(Value::Array(
             values.iter().filter_map(public_only).collect(),
         )),
-        _ => Some(value.clone()),
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => Some(value.clone()),
     }
 }
 
@@ -62,29 +61,25 @@ pub fn boundary_errors(surface: &Value) -> Vec<String> {
         .map(str::to_owned)
         .collect();
 
-    let mut errors = Vec::new();
-    for symbol in symbols {
-        if symbol.get("visibility").and_then(Value::as_str) != Some("public") {
-            continue;
-        }
-        let Some(public) = public_only(symbol) else {
-            continue;
-        };
-        let mut references = BTreeSet::new();
-        collect_named_references(&public, &mut references);
-        let exposed: Vec<_> = references.intersection(&private_names).cloned().collect();
-        if !exposed.is_empty() {
-            errors.push(format!(
-                "{}: {}",
-                symbol
-                    .get("name")
-                    .and_then(Value::as_str)
-                    .unwrap_or("<unnamed>"),
-                exposed.join(", ")
-            ));
-        }
-    }
-    errors
+    symbols
+        .iter()
+        .filter(|symbol| symbol.get("visibility").and_then(Value::as_str) == Some("public"))
+        .filter_map(|symbol| {
+            let public = public_only(symbol)?;
+            let references = named_references(&public);
+            let exposed: Vec<_> = references.intersection(&private_names).cloned().collect();
+            (!exposed.is_empty()).then(|| {
+                format!(
+                    "{}: {}",
+                    symbol
+                        .get("name")
+                        .and_then(Value::as_str)
+                        .unwrap_or("<unnamed>"),
+                    exposed.join(", ")
+                )
+            })
+        })
+        .collect()
 }
 
 pub fn validate_client_targets<'a>(names: impl IntoIterator<Item = &'a str>) -> Result<usize, String> {
@@ -128,17 +123,16 @@ mod tests {
 
     #[test]
     fn ignores_private_fields_but_rejects_private_type_in_public_field() {
-        let mut document = json!({"symbols": [
+        let fixture = |visibility: &str| json!({"symbols": [
             {"name": "Secret", "visibility": "private"},
             {"name": "Visible", "visibility": "public", "definition": {
                 "kind": "object", "fields": [
-                    {"visibility": "private", "type": {"kind": "named", "name": "Secret"}}
+                    {"visibility": visibility, "type": {"kind": "named", "name": "Secret"}}
                 ]
             }}
         ]});
-        assert!(boundary_errors(&document).is_empty());
-        document["symbols"][1]["definition"]["fields"][0]["visibility"] = json!("public");
-        assert_eq!(boundary_errors(&document), vec!["Visible: Secret"]);
+        assert!(boundary_errors(&fixture("private")).is_empty());
+        assert_eq!(boundary_errors(&fixture("public")), vec!["Visible: Secret"]);
     }
 
     #[test]
