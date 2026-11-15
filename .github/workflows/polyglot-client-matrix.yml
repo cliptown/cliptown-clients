@@ -24,8 +24,6 @@ jobs:
         run: |
           python3 -m pip install --disable-pip-version-check jsonschema==4.25.1
           python3 scripts/verify_client_contract.py
-      - name: Verify AttoLang source-only SDK and negative mutation receipts
-        run: node --test tests/atto-target.test.mjs
       - name: Compile C11 slice
         run: cc -std=c11 -Wall -Wextra -Werror -Iclients/c/include -c clients/c/src/client.c -o /tmp/cliptown-client-c.o
       - name: Compile C++17 slice
@@ -43,3 +41,20 @@ jobs:
           ET.parse("clients/java/pom.xml")
           ET.parse("clients/kotlin/pom.xml")
           PY
+
+  atto-rust-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@4be7066ada62dd38de10e7b70166bc74ed198c30
+        with:
+          toolchain: "1.88.0"
+          components: rustfmt, clippy
+      - name: Rust-only AttoLang contract and source receipt tests
+        run: |
+          cargo fmt --manifest-path tools/atto-validation/Cargo.toml -- --check
+          cargo clippy --manifest-path tools/atto-validation/Cargo.toml --all-targets -- -D warnings
+          cargo test --manifest-path tools/atto-validation/Cargo.toml --all-targets
