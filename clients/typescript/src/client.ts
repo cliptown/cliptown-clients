@@ -359,41 +359,49 @@ function assertMemeBankState(value: string): asserts value is MemeBankTransferSt
   }
 }
 
-function assertCipherEnvelope(value: MemeBankCipherEnvelope): void {
-  if (!value || (value.algorithm !== 'xchacha20poly1305-v1' && value.algorithm !== 'aes-256-gcm-v1')) {
-    throw new CliptownContractError('invalid cipher algorithm');
-  }
-  if (!validBase64(value.nonce, 128) || !validBase64(value.ciphertext, MAX_INLINE_CIPHERTEXT_LENGTH)) {
-    throw new CliptownContractError('invalid cipher envelope');
-  }
-  if (!validPortableIdentifier(value.key_id, 128)) {
-    throw new CliptownContractError('invalid encryption key identifier');
-  }
-  if (value.associated_data_hash !== undefined && value.associated_data_hash !== null && !validBase64(value.associated_data_hash, 128)) {
-    throw new CliptownContractError('invalid associated-data hash');
+// Centralized typed boundary for invalid API contract values. The predicate
+// checks stay pure; only this entry point converts failed validation to the
+// existing public exception type.
+function requireContract(condition: boolean, message: string): void {
+  if (!condition) {
+    throw new CliptownContractError(message);
   }
 }
 
+function assertCipherEnvelope(value: MemeBankCipherEnvelope): void {
+  requireContract(
+    Boolean(value) && (value.algorithm === 'xchacha20poly1305-v1' || value.algorithm === 'aes-256-gcm-v1'),
+    'invalid cipher algorithm',
+  );
+  requireContract(
+    validBase64(value.nonce, 128) && validBase64(value.ciphertext, MAX_INLINE_CIPHERTEXT_LENGTH),
+    'invalid cipher envelope',
+  );
+  requireContract(validPortableIdentifier(value.key_id, 128), 'invalid encryption key identifier');
+  requireContract(
+    value.associated_data_hash === undefined ||
+      value.associated_data_hash === null ||
+      validBase64(value.associated_data_hash, 128),
+    'invalid associated-data hash',
+  );
+}
+
 function assertCreateMemeBankTransfer(request: CreateMemeBankTransferRequest): void {
-  if (!request || request.contract_version !== 1) {
-    throw new CliptownContractError('unsupported MemeBank contract version');
-  }
+  requireContract(Boolean(request) && request.contract_version === 1, 'unsupported MemeBank contract version');
   assertMemeBankDirection(request.direction);
-  if (!validPortableIdentifier(request.source_item_id, 128)) {
-    throw new CliptownContractError('invalid source item identifier');
-  }
-  if (!/^[A-Za-z0-9.+-]+\/[A-Za-z0-9.+-]+$/.test(request.media_type) || request.media_type.length > 128) {
-    throw new CliptownContractError('invalid media type');
-  }
-  if (!SHA256_BASE64URL.test(request.content_sha256)) {
-    throw new CliptownContractError('invalid content digest');
-  }
-  if (!Number.isSafeInteger(request.content_length) || request.content_length < 0 || request.content_length > MAX_SOURCE_CONTENT_LENGTH) {
-    throw new CliptownContractError('invalid source content length');
-  }
-  if (!validTimestamp(request.expires_at)) {
-    throw new CliptownContractError('invalid transfer expiry');
-  }
+  requireContract(validPortableIdentifier(request.source_item_id, 128), 'invalid source item identifier');
+  requireContract(
+    /^[A-Za-z0-9.+-]+\/[A-Za-z0-9.+-]+$/.test(request.media_type) && request.media_type.length <= 128,
+    'invalid media type',
+  );
+  requireContract(SHA256_BASE64URL.test(request.content_sha256), 'invalid content digest');
+  requireContract(
+    Number.isSafeInteger(request.content_length) &&
+      request.content_length >= 0 &&
+      request.content_length <= MAX_SOURCE_CONTENT_LENGTH,
+    'invalid source content length',
+  );
+  requireContract(validTimestamp(request.expires_at), 'invalid transfer expiry');
   assertCipherEnvelope(request.payload);
   if (request.encrypted_metadata !== undefined && request.encrypted_metadata !== null) {
     assertCipherEnvelope(request.encrypted_metadata);
@@ -404,21 +412,29 @@ function assertMemeBankTransfer(transfer: MemeBankTransfer): void {
   assertCreateMemeBankTransfer(transfer);
   assertTransferId(transfer.transfer_id);
   assertMemeBankState(transfer.state);
-  if (!validTimestamp(transfer.created_at) || !validTimestamp(transfer.updated_at)) {
-    throw new CliptownContractError('invalid transfer timestamps');
-  }
-  if (transfer.acknowledged_at !== undefined && transfer.acknowledged_at !== null && !validTimestamp(transfer.acknowledged_at)) {
-    throw new CliptownContractError('invalid acknowledgement timestamp');
-  }
+  requireContract(
+    validTimestamp(transfer.created_at) && validTimestamp(transfer.updated_at),
+    'invalid transfer timestamps',
+  );
+  requireContract(
+    transfer.acknowledged_at === undefined ||
+      transfer.acknowledged_at === null ||
+      validTimestamp(transfer.acknowledged_at),
+    'invalid acknowledgement timestamp',
+  );
 }
 
 function assertAcknowledgement(request: AcknowledgeMemeBankTransferRequest): void {
-  if (!request || request.contract_version !== 1 || !['acknowledged', 'ignored', 'rejected'].includes(request.disposition)) {
-    throw new CliptownContractError('invalid transfer acknowledgement');
-  }
-  if (!validPortableIdentifier(request.client_receipt_id, 128) || request.client_receipt_id.length < 16) {
-    throw new CliptownContractError('invalid acknowledgement receipt identifier');
-  }
+  requireContract(
+    Boolean(request) &&
+      request.contract_version === 1 &&
+      ['acknowledged', 'ignored', 'rejected'].includes(request.disposition),
+    'invalid transfer acknowledgement',
+  );
+  requireContract(
+    validPortableIdentifier(request.client_receipt_id, 128) && request.client_receipt_id.length >= 16,
+    'invalid acknowledgement receipt identifier',
+  );
 }
 
 function validPortableIdentifier(value: string, maximum: number): boolean {

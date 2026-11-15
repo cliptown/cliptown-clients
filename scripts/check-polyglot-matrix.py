@@ -15,6 +15,7 @@ REQUIRED = {
     "ruby": ("clients/ruby", "cliptown_client.gemspec"),
     "php": ("clients/php", "composer.json"),
     "rust": ("clients/rust", "Cargo.toml"),
+    "rust-wasm": ("clients/wasm", "Cargo.toml"),
     "dart": ("clients/dart", "pubspec.yaml"),
     "gleam": ("clients/gleam", "gleam.toml"),
     "erlang": ("clients/erlang", "rebar.config"),
@@ -40,4 +41,4 @@ package = json.loads((ROOT / "clients/typescript/package.json").read_text())
 for runtime in ("nodejs", "deno", "bun", "edge"):
     assert f"./{runtime}" in package["exports"]
     assert (ROOT / "clients/typescript/src/runtimes" / f"{runtime}.ts").is_file()
-print("ClipTown client matrix: 16 requested language slices and four TypeScript runtimes")
+print("ClipTown client matrix: 17 Zed target slices (including Rust WASM) and four TypeScript runtimes")

@@ -120,6 +120,29 @@ test('invalid MemeBank requests fail before token lookup and network access', as
     CliptownContractError,
   );
 
+  // Boundary and nested envelope failures must be observable as the same
+  // typed contract error and must not obtain credentials or call the network.
+  const invalidCases: Array<{ value: CreateMemeBankTransferRequest; reason: string }> = [
+    { value: { ...request(), source_item_id: '../sibling' }, reason: 'invalid source item identifier' },
+    { value: { ...request(), media_type: 'image/png;token=unsafe' }, reason: 'invalid media type' },
+    { value: { ...request(), content_sha256: 'invalid' }, reason: 'invalid content digest' },
+    { value: { ...request(), content_length: -1 }, reason: 'invalid source content length' },
+    { value: { ...request(), expires_at: 'not-a-date' }, reason: 'invalid transfer expiry' },
+    { value: { ...request(), payload: { ...request().payload, key_id: '../../user' } }, reason: 'invalid encryption key identifier' },
+    { value: { ...request(), payload: { ...request().payload, nonce: 'not/base64?' } }, reason: 'invalid cipher envelope' },
+    { value: { ...request(), payload: { ...request().payload, associated_data_hash: 'bad*' } }, reason: 'invalid associated-data hash' },
+  ];
+  for (const { value, reason } of invalidCases) {
+    await assert.rejects(
+      () => client.createMemeBankTransfer('create-transfer-0001', value),
+      (error: unknown) => {
+        assert.ok(error instanceof CliptownContractError);
+        assert.equal(error.message, `ClipTown contract: ${reason}`);
+        return true;
+      },
+    );
+  }
+
   assert.equal(tokenCalls, 0);
   assert.equal(networkCalls, 0);
 });
