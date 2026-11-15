@@ -15,15 +15,17 @@ fn validate(root: &Path) -> Result<(usize, usize), String> {
         return Err(format!("public API exposes private named types: {}", leaks.len()));
     }
 
-    let mut directories = Vec::new();
-    for entry in fs::read_dir(root.join("clients"))
+    let directories: Vec<String> = fs::read_dir(root.join("clients"))
         .map_err(|_| "cannot inspect client runtimes")?
-    {
-        let entry = entry.map_err(|_| "cannot read a client runtime entry")?;
-        if entry.file_type().map_err(|_| "cannot inspect runtime type")?.is_dir() {
-            directories.push(entry.file_name().to_string_lossy().into_owned());
-        }
-    }
+        .map(|entry| -> Result<Option<String>, String> {
+            let entry = entry.map_err(|_| "cannot read a client runtime entry")?;
+            let file_type = entry.file_type().map_err(|_| "cannot inspect runtime type")?;
+            Ok(file_type.is_dir().then(|| entry.file_name().to_string_lossy().into_owned()))
+        })
+        .collect::<Result<Vec<_>, _>>()?
+        .into_iter()
+        .flatten()
+        .collect();
     let count = validate_client_targets(directories.iter().map(String::as_str))?;
     let symbols = surface
         .get("symbols")
@@ -33,9 +35,9 @@ fn validate(root: &Path) -> Result<(usize, usize), String> {
 }
 
 fn main() -> ExitCode {
-    let mut args = std::env::args().skip(1);
-    let root = args.next().unwrap_or_else(|| ".".to_string());
-    if args.next().is_some() {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    let root = args.first().map(String::as_str).unwrap_or(".");
+    if args.len() > 1 {
         eprintln!("usage: cliptown-contract-boundary [repository-root]");
         return ExitCode::from(2);
     }
